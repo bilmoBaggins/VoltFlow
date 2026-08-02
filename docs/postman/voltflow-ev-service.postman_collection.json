@@ -1,0 +1,101 @@
+{
+  "info": {
+    "_postman_id": "voltflow-ev-service-001",
+    "name": "VoltFlow Fake EV Service",
+    "description": "Dummy EV fleet API for internship. Import into Postman. Set baseUrl to http://localhost:3001",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "vehicleId",
+      "value": "ev-01"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "Check API is running"
+      }
+    },
+    {
+      "name": "List vehicles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/vehicles",
+        "description": "Returns 5 fake EVs with battery % and location"
+      }
+    },
+    {
+      "name": "Get vehicle by id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/vehicles/{{vehicleId}}",
+        "description": "Get one EV. Change vehicleId variable (ev-01 ... ev-05)"
+      }
+    },
+    {
+      "name": "Get telemetry",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/vehicles/{{vehicleId}}/telemetry",
+        "description": "Latest battery / status snapshot"
+      }
+    },
+    {
+      "name": "Set status charging",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"charging\"\n}"
+        },
+        "url": "{{baseUrl}}/vehicles/ev-03/status",
+        "description": "Demo control: set Van C to charging"
+      }
+    },
+    {
+      "name": "Set status idle",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"idle\"\n}"
+        },
+        "url": "{{baseUrl}}/vehicles/ev-03/status",
+        "description": "Demo control: set Van C back to idle"
+      }
+    },
+    {
+      "name": "Get vehicle not found (expect 404)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/vehicles/ev-999",
+        "description": "QA negative test — should return 404"
+      }
+    }
+  ]
+}

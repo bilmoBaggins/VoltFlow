@@ -1,0 +1,31 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Segoe UI", "Avenir Next", "Helvetica Neue", sans-serif;
+  line-height: 1.45;
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.9em;
+}
+
+a {
+  color: #1f6b4f;
+}
+
+select {
+  font: inherit;
+  margin-left: 0.35rem;
+}

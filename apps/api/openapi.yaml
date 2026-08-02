@@ -1,0 +1,77 @@
+openapi: 3.0.3
+info:
+  title: VoltFlow Fake EV Service
+  description: Dummy EV fleet API for internship (no real vehicles).
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001
+    description: Local API
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+  /vehicles:
+    get:
+      summary: List all fake EVs
+      responses:
+        "200":
+          description: Array of vehicles
+  /vehicles/{id}:
+    get:
+      summary: Get one EV
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: ev-01
+      responses:
+        "200":
+          description: Vehicle
+        "404":
+          description: Not found
+  /vehicles/{id}/telemetry:
+    get:
+      summary: Latest telemetry snapshot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Telemetry
+        "404":
+          description: Not found
+  /vehicles/{id}/status:
+    patch:
+      summary: Set vehicle status (demo control)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [idle, charging, driving]
+      responses:
+        "200":
+          description: Updated vehicle
+        "400":
+          description: Bad status
+        "404":
+          description: Not found
