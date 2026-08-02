@@ -5,11 +5,29 @@ import { dirname, join } from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const vehiclesPath = join(__dirname, "../data/vehicles.json");
 
-/** Seed templates (ids / names / home regions stay fixed). */
+/** Seed templates (ids / names stay fixed; gridRegion randomized per request). */
 const templates = JSON.parse(readFileSync(vehiclesPath, "utf8"));
 
 const STATUSES = ["idle", "charging", "driving"];
 const SITE_TYPES = ["depot", "home", "public"];
+
+/** UK GSP codes from docs/ukGridRegions.md (no letter I). */
+const GRID_REGIONS = [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "J",
+  "K",
+  "L",
+  "M",
+  "N",
+  "P",
+];
 
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -23,6 +41,7 @@ function pick(arr) {
 function randomizeVehicle(template) {
   const status = pick(STATUSES);
   const siteType = pick(SITE_TYPES);
+  const gridRegion = pick(GRID_REGIONS);
 
   // Tiny GPS jitter so map pins move slightly (~±0.01 degrees)
   const lat = Number(
@@ -44,6 +63,7 @@ function randomizeVehicle(template) {
       ...template.location,
       lat,
       lng,
+      gridRegion,
     },
     updatedAt: new Date().toISOString(),
   };
