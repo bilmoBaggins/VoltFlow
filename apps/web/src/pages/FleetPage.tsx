@@ -9,7 +9,7 @@ import { fetchVehicles } from "../api/client";
 import type { Vehicle } from "../types/vehicle";
 
 export function FleetPage() {
-  const [vehicles, setVehicles = useState<Vehicle[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
