@@ -6,6 +6,20 @@ Related docs: `docs/mockups/README.md`, `docs/setup.md`, `docs/services.md`, `do
 
 ---
 
+## Claude Code session workflow (applies to every session, any area of the repo)
+
+Follow this sequence whenever Claude Code is used to make changes in this repo, regardless of which part of the codebase:
+
+1. **Sync first.** Before writing or editing any code, run `git fetch origin` and pull/merge the latest `origin/main` into the current branch. Surface any conflicts to the user instead of resolving them destructively.
+2. **Make the change**, following the rest of this guide (ownership rules, tech stack, etc.).
+3. **Ask before committing.** Once the change is ready, ask the user: do they want Claude to commit it, or will they commit it themselves? Never commit silently.
+4. **If Claude commits:** push the branch, then wait for the GitHub Actions checks (`Quality (lint, format, build)` and `Security (dependency audit)`, defined in `.github/workflows/ci.yml`) to finish.
+5. **Report the check result.**
+   - If checks **pass**: ask the user whether they want Claude to open the PR automatically, or whether they'll open it themselves.
+   - If checks **fail**: report which check and step failed (with the log detail) and fix or ask before retrying — do not open a PR on a red run.
+
+---
+
 ## Product in one line
 
 **VoltFlow** = fake EV fleet + UK grid price/carbon + charging sessions + home reimbursement + AI `CHARGE` / `WAIT` / `STOP` advice — demo portal for internship (not production hardware).
