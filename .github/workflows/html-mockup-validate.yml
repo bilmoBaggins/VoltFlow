@@ -1,0 +1,23 @@
+name: HTML Mockup Validation
+
+on:
+  pull_request:
+    paths:
+      - "docs/mockups/**/*.html"
+  push:
+    branches: [main]
+    paths:
+      - "docs/mockups/**/*.html"
+
+jobs:
+  validate-html:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate HTML mockups
+        run: npx --yes html-validate "docs/mockups/**/*.html"
