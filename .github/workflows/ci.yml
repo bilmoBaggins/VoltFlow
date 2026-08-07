@@ -25,3 +25,8 @@ jobs:
       - run: npm run eslint
       - run: npm run format:check
       - run: npm run build
+      # react-router currently has one high-severity advisory (RSC/Actions
+      # CSRF bypass) that doesn't apply to this app's plain BrowserRouter
+      # setup, with no patched version yet. Gate on critical until it's
+      # fixed upstream, then tighten back to "high".
+      - run: npm audit --audit-level=critical
