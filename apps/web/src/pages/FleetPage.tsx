@@ -26,7 +26,18 @@ export function FleetPage() {
   }
 
   useEffect(() => {
-    void load();
+    // Initial state already reflects "loading" (loading=true, error=null),
+    // so only the async completion needs to touch state here.
+    fetchVehicles()
+      .then(setVehicles)
+      .catch((err) => {
+        setError(
+          err instanceof Error ? err.message : "Failed to load vehicles",
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -39,7 +50,12 @@ export function FleetPage() {
       </p>
 
       <p>
-        <button className="btn" type="button" onClick={() => void load()} disabled={loading}>
+        <button
+          className="btn"
+          type="button"
+          onClick={() => void load()}
+          disabled={loading}
+        >
           {loading ? "Loading…" : "Refresh"}
         </button>
       </p>

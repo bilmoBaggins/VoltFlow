@@ -30,7 +30,9 @@ export function VehiclePage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load vehicle");
+          setError(
+            err instanceof Error ? err.message : "Failed to load vehicle",
+          );
         }
       }
     }
