@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import "./AppLayout.css";
 
@@ -140,12 +140,14 @@ export function AppLayout() {
   const location = useLocation();
   const isReimbursementsActive = location.pathname.startsWith("/reimbursements");
   const [reimbursementsOpen, setReimbursementsOpen] = useState(isReimbursementsActive);
+  const [wasReimbursementsActive, setWasReimbursementsActive] = useState(isReimbursementsActive);
 
-  useEffect(() => {
+  if (isReimbursementsActive !== wasReimbursementsActive) {
+    setWasReimbursementsActive(isReimbursementsActive);
     if (isReimbursementsActive) {
       setReimbursementsOpen(true);
     }
-  }, [isReimbursementsActive]);
+  }
 
   return (
     <div className="app-shell">
