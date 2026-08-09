@@ -7,6 +7,7 @@ const links = [
   { to: "/sessions", label: "Sessions", owner: "Student 3" },
   { to: "/reimbursements", label: "Reimbursements", owner: "Student 4" },
   { to: "/ai", label: "Ask AI", owner: "Student 5" },
+  { to: "/driver", label: "Driver", owner: "Phase 2 / optional" },
 ];
 
 export function AppLayout() {
