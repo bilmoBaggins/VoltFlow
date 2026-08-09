@@ -220,12 +220,14 @@ export function AppLayout() {
   const [reimbursementsOpen, setReimbursementsOpen] = useState(
     isReimbursementsActive,
   );
-  const [wasReimbursementsActive, setWasReimbursementsActive] = useState(
+  const [prevReimbursementsActive, setPrevReimbursementsActive] = useState(
     isReimbursementsActive,
   );
 
-  if (isReimbursementsActive !== wasReimbursementsActive) {
-    setWasReimbursementsActive(isReimbursementsActive);
+  // Adjusting state during render (not in an effect) on navigating into
+  // /reimbursements — see https://react.dev/learn/you-might-not-need-an-effect
+  if (isReimbursementsActive !== prevReimbursementsActive) {
+    setPrevReimbursementsActive(isReimbursementsActive);
     if (isReimbursementsActive) {
       setReimbursementsOpen(true);
     }
