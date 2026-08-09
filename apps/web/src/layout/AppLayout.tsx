@@ -296,7 +296,7 @@ export function AppLayout() {
 
           <NavItem to="/ai" icon={<SparkleIcon />} label="Ask AI" />
           <NavItem icon={<BarChartIcon />} label="Reports" disabled />
-          <NavItem icon={<GearIcon />} label="Settings" disabled />
+          <NavItem to="/settings" icon={<GearIcon />} label="Settings" />
           <NavItem icon={<LinkIcon />} label="Integrations" disabled />
         </nav>
 
