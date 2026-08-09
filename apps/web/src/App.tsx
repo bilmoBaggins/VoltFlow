@@ -4,6 +4,7 @@ import { AiAdvisorPage } from "./pages/AiAdvisorPage";
 import { FleetPage } from "./pages/FleetPage";
 import { ReimbursementsPage } from "./pages/ReimbursementsPage";
 import { SessionsPage } from "./pages/SessionsPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { VehiclePage } from "./pages/VehiclePage";
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="sessions" element={<SessionsPage />} />
           <Route path="reimbursements" element={<ReimbursementsPage />} />
           <Route path="ai" element={<AiAdvisorPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
