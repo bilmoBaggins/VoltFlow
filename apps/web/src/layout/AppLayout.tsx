@@ -2,7 +2,6 @@ import { NavLink, Outlet } from "react-router-dom";
 import "./AppLayout.css";
 
 const links = [
-  { to: "/", label: "Fleet", owner: "Student 1" },
   { to: "/vehicle/ev-01", label: "Vehicle", owner: "Student 2" },
   { to: "/sessions", label: "Sessions", owner: "Student 3" },
   { to: "/reimbursements", label: "Reimbursements", owner: "Student 4" },
