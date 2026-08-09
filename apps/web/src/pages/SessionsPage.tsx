@@ -30,13 +30,19 @@ const STAT_CARDS = [
   },
 ] as const;
 
-type IconName = "wallet" | "home" | "depot" | "search" | "calendar" | "export" | "chevron";
+type IconName =
+  "wallet" | "home" | "depot" | "search" | "calendar" | "export" | "chevron";
 
 function Icon({ name }: { name: IconName }) {
   switch (name) {
     case "wallet":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
           <rect x="3" y="6" width="18" height="13" rx="2" />
           <path d="M3 10h18" />
           <circle cx="16.5" cy="14" r="1.2" fill="currentColor" stroke="none" />
@@ -44,7 +50,12 @@ function Icon({ name }: { name: IconName }) {
       );
     case "home":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
           <path d="M4 11.5 12 4l8 7.5" />
           <path d="M6 10v9h12v-9" />
           <path d="M10 19v-5h4v5" />
@@ -52,28 +63,48 @@ function Icon({ name }: { name: IconName }) {
       );
     case "depot":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
           <rect x="4" y="4" width="16" height="16" rx="2" />
           <path d="M8 4v16M16 4v16M4 12h16" />
         </svg>
       );
     case "search":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
           <circle cx="11" cy="11" r="6.5" />
           <path d="m20 20-3.5-3.5" />
         </svg>
       );
     case "calendar":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
           <rect x="3.5" y="5" width="17" height="16" rx="2" />
           <path d="M3.5 10h17M8 3v4M16 3v4" />
         </svg>
       );
     case "export":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
           <path d="M12 3v11" />
           <path d="m8 10 4 4 4-4" />
           <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
@@ -81,7 +112,12 @@ function Icon({ name }: { name: IconName }) {
       );
     case "chevron":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
           <path d="m6 9 6 6 6-6" />
         </svg>
       );
@@ -153,13 +189,19 @@ function buildSessions(count: number): SessionRow[] {
 
     const day = 25 - Math.floor(i / 12); // spread across 19–25 May
     const minutesFromNoon = 480 - (i % 12) * 40;
-    const hour = Math.max(6, Math.min(22, 12 + Math.floor(minutesFromNoon / 60)));
+    const hour = Math.max(
+      6,
+      Math.min(22, 12 + Math.floor(minutesFromNoon / 60)),
+    );
     const minute = Math.abs(minutesFromNoon % 60);
     const time = `${String(hour).padStart(2, "0")}${String(minute).padStart(2, "0")}`;
 
     const kwh = Number((14 + ((i * 7) % 40) + (i % 4) * 0.6).toFixed(2));
     const pricePerKwh = Number(
-      (site.type === "depot" ? 15.5 + (i % 5) * 0.4 : 20.5 + (i % 4) * 0.5).toFixed(2),
+      (site.type === "depot"
+        ? 15.5 + (i % 5) * 0.4
+        : 20.5 + (i % 4) * 0.5
+      ).toFixed(2),
     );
     const costGbp = Number(((kwh * pricePerKwh) / 10).toFixed(2));
 
@@ -185,8 +227,18 @@ const MOCK_SESSIONS: SessionRow[] = buildSessions(78);
 const PAGE_SIZE = 10;
 
 const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 function formatDisplayDate(iso: string): string {
