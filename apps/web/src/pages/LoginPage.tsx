@@ -25,7 +25,10 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
 
-    if (email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD) {
+    if (
+      email.trim().toLowerCase() === DEMO_EMAIL &&
+      password === DEMO_PASSWORD
+    ) {
       localStorage.setItem(AUTH_STORAGE_KEY, "true");
       navigate("/sessions");
       return;
@@ -74,7 +77,11 @@ export function LoginPage() {
               autoComplete="email"
               required
             />
-            <svg className="login-input-icon" viewBox="0 0 20 20" aria-hidden="true">
+            <svg
+              className="login-input-icon"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
               <path
                 fill="none"
                 stroke="currentColor"
@@ -98,7 +105,11 @@ export function LoginPage() {
               autoComplete="current-password"
               required
             />
-            <svg className="login-input-icon" viewBox="0 0 20 20" aria-hidden="true">
+            <svg
+              className="login-input-icon"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
               <path
                 fill="none"
                 stroke="currentColor"
@@ -122,8 +133,19 @@ export function LoginPage() {
         <hr className="login-divider" />
 
         <p className="login-note">
-          <svg className="login-note-icon" viewBox="0 0 20 20" aria-hidden="true">
-            <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="1.4" />
+          <svg
+            className="login-note-icon"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+          >
+            <circle
+              cx="10"
+              cy="10"
+              r="8"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+            />
             <path
               d="M10 9v4.5 M10 6.5v.01"
               fill="none"
