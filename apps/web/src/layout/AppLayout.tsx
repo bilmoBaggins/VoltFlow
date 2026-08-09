@@ -246,7 +246,7 @@ export function AppLayout() {
         <nav className="sidebar-nav" aria-label="Main">
           <NavItem to="/" end icon={<GridIcon />} label="Overview" />
           <NavItem to="/vehicle/ev-01" icon={<CarIcon />} label="Vehicles" />
-          <NavItem icon={<UserIcon />} label="Drivers" disabled />
+          <NavItem to="/driver" icon={<UserIcon />} label="Drivers" />
           <NavItem to="/sessions" icon={<ZapIcon />} label="Charging" />
 
           <div className="nav-group">
