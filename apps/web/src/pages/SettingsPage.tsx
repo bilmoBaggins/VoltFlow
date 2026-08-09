@@ -8,8 +8,8 @@ export function SettingsPage() {
       <h1>Settings</h1>
       <p className="page-owner">Shared · placeholder</p>
       <p className="page-hint">
-        No mockup or owner assigned yet. This page exists so the sidebar
-        nav item has somewhere to go — fill in real settings UI later.
+        No mockup or owner assigned yet. This page exists so the sidebar nav
+        item has somewhere to go — fill in real settings UI later.
       </p>
     </section>
   );

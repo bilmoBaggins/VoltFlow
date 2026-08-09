@@ -3,7 +3,12 @@ import "./AppLayout.css";
 
 const links = [
   { to: "/", label: "Fleet", icon: TruckIcon, owner: "Student 1" },
-  { to: "/sessions", label: "Sessions", icon: TrendingUpIcon, owner: "Student 3" },
+  {
+    to: "/sessions",
+    label: "Sessions",
+    icon: TrendingUpIcon,
+    owner: "Student 3",
+  },
   {
     to: "/reimbursements",
     label: "Reimbursements",
@@ -78,7 +83,13 @@ type IconProps = { className?: string };
 
 function BoltIcon({ className }: IconProps) {
   return (
-    <svg className={className} width="26" height="26" viewBox="0 0 24 24" fill="none">
+    <svg
+      className={className}
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
       <path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z" fill="#2563eb" />
     </svg>
   );
