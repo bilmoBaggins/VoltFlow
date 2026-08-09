@@ -1,255 +1,322 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { useState, type ReactNode } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import "./AppLayout.css";
 
-const links = [
-  { to: "/", label: "Fleet", icon: TruckIcon, owner: "Student 1" },
-  {
-    to: "/sessions",
-    label: "Sessions",
-    icon: TrendingUpIcon,
-    owner: "Student 3",
-  },
-  {
-    to: "/reimbursements",
-    label: "Reimbursements",
-    icon: PoundSterlingIcon,
-    owner: "Student 4",
-  },
-  { to: "/ai", label: "AI Advisor", icon: CpuIcon, owner: "Student 5" },
-  { to: "/settings", label: "Settings", icon: SettingsIcon, owner: "Shared" },
-];
+function ZapIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M11 2 4 11h5l-1 7 7-9h-5l1-7z" />
+    </svg>
+  );
+}
+
+function GridIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2.5" y="2.5" width="6" height="6" rx="1.2" />
+      <rect x="11.5" y="2.5" width="6" height="6" rx="1.2" />
+      <rect x="2.5" y="11.5" width="6" height="6" rx="1.2" />
+      <rect x="11.5" y="11.5" width="6" height="6" rx="1.2" />
+    </svg>
+  );
+}
+
+function CarIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3.5 12.5 5 7.8a1.6 1.6 0 0 1 1.5-1.1h7a1.6 1.6 0 0 1 1.5 1.1l1.5 4.7" />
+      <rect x="2.5" y="12.5" width="15" height="3.5" rx="1" />
+      <circle cx="6" cy="16.3" r="1.1" />
+      <circle cx="14" cy="16.3" r="1.1" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="10" cy="6.5" r="3.3" />
+      <path d="M3.5 17c0-3.3 2.9-5.5 6.5-5.5s6.5 2.2 6.5 5.5" />
+    </svg>
+  );
+}
+
+function FileIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 2.5h6.5L15.5 6.5V17a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5z" />
+      <path d="M11.5 2.5V6.5h4" />
+      <path d="M6.8 10.5h6.4M6.8 13.3h6.4" />
+    </svg>
+  );
+}
+
+function SparkleIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 3.5c.4 2.4 1.1 3.6 4 4-2.9.4-3.6 1.6-4 4-.4-2.4-1.1-3.6-4-4 2.9-.4 3.6-1.6 4-4z" />
+      <path d="M15.5 12.8c.2 1.1.6 1.6 1.8 1.8-1.2.2-1.6.7-1.8 1.8-.2-1.1-.6-1.6-1.8-1.8 1.2-.2 1.6-.7 1.8-1.8z" />
+    </svg>
+  );
+}
+
+function BarChartIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3.5 16.5v-5M9 16.5v-9M14.5 16.5v-3" />
+      <path d="M2.5 16.5h15" />
+    </svg>
+  );
+}
+
+function GearIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="10" cy="10" r="2.6" />
+      <path d="M10 3.2v1.7M10 15.1v1.7M16.8 10h-1.7M4.9 10H3.2M14.8 5.2l-1.2 1.2M6.4 13.4l-1.2 1.2M14.8 14.8l-1.2-1.2M6.4 6.6 5.2 5.4" />
+    </svg>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8.3 11.7 11.7 8.3" />
+      <path d="M9 5.6l.9-.9a3 3 0 0 1 4.4 4.4l-.9.9M11 14.4l-.9.9a3 3 0 0 1-4.4-4.4l.9-.9" />
+    </svg>
+  );
+}
+
+function BuildingIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="2.5" width="8" height="15" rx="0.6" />
+      <path d="M6.3 5.5h1M6.3 8.3h1M6.3 11.1h1M9.7 5.5h1M9.7 8.3h1M9.7 11.1h1" />
+      <path d="M12 8h3.5a.5.5 0 0 1 .5.5v9" />
+      <path d="M14 11h.7M14 13.5h.7" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 8l5 5 5-5" />
+    </svg>
+  );
+}
+
+type NavItemProps = {
+  to?: string;
+  end?: boolean;
+  icon: ReactNode;
+  label: string;
+  disabled?: boolean;
+};
+
+function NavItem({ to, end, icon, label, disabled }: NavItemProps) {
+  if (disabled || !to) {
+    return (
+      <span className="nav-link disabled" aria-disabled="true">
+        <span className="nav-icon">{icon}</span>
+        <span className="nav-label">{label}</span>
+        <span className="nav-soon">Soon</span>
+      </span>
+    );
+  }
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+    >
+      <span className="nav-icon">{icon}</span>
+      <span className="nav-label">{label}</span>
+    </NavLink>
+  );
+}
 
 export function AppLayout() {
+  const location = useLocation();
+  const isReimbursementsActive =
+    location.pathname.startsWith("/reimbursements");
+  const [reimbursementsOpen, setReimbursementsOpen] = useState(
+    isReimbursementsActive,
+  );
+  const [wasReimbursementsActive, setWasReimbursementsActive] = useState(
+    isReimbursementsActive,
+  );
+
+  if (isReimbursementsActive !== wasReimbursementsActive) {
+    setWasReimbursementsActive(isReimbursementsActive);
+    if (isReimbursementsActive) {
+      setReimbursementsOpen(true);
+    }
+  }
+
   return (
     <div className="app-shell">
-      <header className="app-topbar">
-        <div className="brand">
-          <BoltIcon className="brand-mark" />
-          <span className="brand-name">VoltFlow</span>
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <span className="brand-icon">
+            <ZapIcon />
+          </span>
+          <span className="brand-mark">VoltFlow</span>
         </div>
-        <div className="topbar-right">
-          <button type="button" className="icon-btn" aria-label="Notifications">
-            <BellIcon />
-          </button>
-          <button type="button" className="admin-chip">
-            <span className="avatar">A</span>
-            <span className="admin-label">Admin</span>
-            <ChevronDownIcon className="chevron" />
-          </button>
-        </div>
-      </header>
 
-      <div className="app-body">
-        <nav className="app-sidebar" aria-label="Main">
-          <div className="nav-list">
-            {links.map((link) => {
-              const Icon = link.icon;
-              return (
+        <nav className="sidebar-nav" aria-label="Main">
+          <NavItem to="/" end icon={<GridIcon />} label="Overview" />
+          <NavItem to="/vehicle/ev-01" icon={<CarIcon />} label="Vehicles" />
+          <NavItem icon={<UserIcon />} label="Drivers" disabled />
+          <NavItem to="/sessions" icon={<ZapIcon />} label="Charging" />
+
+          <div className="nav-group">
+            <div
+              className={isReimbursementsActive ? "nav-row active" : "nav-row"}
+            >
+              <NavLink to="/reimbursements" className="nav-link">
+                <span className="nav-icon">
+                  <FileIcon />
+                </span>
+                <span className="nav-label">Reimbursements</span>
+              </NavLink>
+              <button
+                type="button"
+                className={
+                  reimbursementsOpen ? "nav-chevron open" : "nav-chevron"
+                }
+                aria-expanded={reimbursementsOpen}
+                aria-label={
+                  reimbursementsOpen
+                    ? "Collapse Reimbursements"
+                    : "Expand Reimbursements"
+                }
+                onClick={() => setReimbursementsOpen((open) => !open)}
+              >
+                <ChevronDownIcon />
+              </button>
+            </div>
+            {reimbursementsOpen && (
+              <div className="nav-subgroup">
                 <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.to === "/"}
+                  to="/reimbursements"
+                  end
                   className={({ isActive }) =>
-                    isActive ? "nav-item active" : "nav-item"
+                    isActive ? "nav-sublink active" : "nav-sublink"
                   }
-                  title={`Owned by ${link.owner}`}
                 >
-                  <Icon />
-                  <span>{link.label}</span>
+                  Queue
                 </NavLink>
-              );
-            })}
+                <span className="nav-sublink disabled">
+                  History
+                  <span className="nav-soon">Soon</span>
+                </span>
+              </div>
+            )}
           </div>
 
-          <button type="button" className="location-box">
-            <MapPinIcon className="pin" />
-            <span className="location-text">
-              <span className="location-title">All Locations</span>
-              <span className="location-sub">London, UK</span>
-            </span>
-            <ChevronDownIcon className="chevron" />
-          </button>
+          <NavItem to="/ai" icon={<SparkleIcon />} label="Ask AI" />
+          <NavItem icon={<BarChartIcon />} label="Reports" disabled />
+          <NavItem to="/settings" icon={<GearIcon />} label="Settings" />
+          <NavItem icon={<LinkIcon />} label="Integrations" disabled />
         </nav>
 
+        <button type="button" className="org-switcher">
+          <span className="org-icon">
+            <BuildingIcon />
+          </span>
+          <span className="org-text">
+            <span className="org-name">Acme Logistics</span>
+            <span className="org-tier">Enterprise</span>
+          </span>
+          <span className="org-chevron">
+            <ChevronDownIcon />
+          </span>
+        </button>
+      </aside>
+
+      <div className="app-content">
         <main className="app-main">
           <Outlet />
         </main>
       </div>
     </div>
-  );
-}
-
-type IconProps = { className?: string };
-
-function BoltIcon({ className }: IconProps) {
-  return (
-    <svg
-      className={className}
-      width="26"
-      height="26"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z" fill="#2563eb" />
-    </svg>
-  );
-}
-
-function BellIcon({ className }: IconProps) {
-  return (
-    <svg
-      className={className}
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M10.268 21a2 2 0 0 0 3.464 0" />
-      <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
-    </svg>
-  );
-}
-
-function ChevronDownIcon({ className }: IconProps) {
-  return (
-    <svg
-      className={className}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
-function MapPinIcon({ className }: IconProps) {
-  return (
-    <svg
-      className={className}
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function TruckIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-      <path d="M15 18H9" />
-      <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
-      <circle cx="17" cy="18" r="2" />
-      <circle cx="7" cy="18" r="2" />
-    </svg>
-  );
-}
-
-function TrendingUpIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-      <polyline points="16 7 22 7 22 13" />
-    </svg>
-  );
-}
-
-function PoundSterlingIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 7c0-5.333-8-5.333-8 0" />
-      <path d="M10 7v14" />
-      <path d="M6 21h12" />
-      <path d="M6 13h10" />
-    </svg>
-  );
-}
-
-function CpuIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="16" height="16" x="4" y="4" rx="2" />
-      <rect width="6" height="6" x="9" y="9" rx="1" />
-      <path d="M15 2v2" />
-      <path d="M15 20v2" />
-      <path d="M2 15h2" />
-      <path d="M2 9h2" />
-      <path d="M20 15h2" />
-      <path d="M20 9h2" />
-      <path d="M9 2v2" />
-      <path d="M9 20v2" />
-    </svg>
-  );
-}
-
-function SettingsIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
   );
 }
