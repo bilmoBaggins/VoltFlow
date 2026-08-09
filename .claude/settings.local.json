@@ -4,7 +4,9 @@
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" \"https://api.octopus.energy/v1/products/AGILE-24-10-01/electricity-tariffs/E-1R-AGILE-24-10-01-C/standard-unit-rates/?page_size=48\")",
       "Bash(mkdir -p /private/tmp/claude-502/-Users-musab-Desktop-github-code--voltflow--Volt-Flow/53d46baf-9588-4160-b815-9d336039fd1a/scratchpad)",
       "Bash(npx --yes playwright install chromium --with-deps)",
-      "Bash(npx --yes playwright screenshot --wait-for-timeout=2000 --viewport-size=1600,1000 http://localhost:5173/reimbursements /private/tmp/claude-502/-Users-musab-Desktop-github-code--voltflow--Volt-Flow/53d46baf-9588-4160-b815-9d336039fd1a/scratchpad/reimbursements.png)"
+      "Bash(npx --yes playwright screenshot --wait-for-timeout=2000 --viewport-size=1600,1000 http://localhost:5173/reimbursements /private/tmp/claude-502/-Users-musab-Desktop-github-code--voltflow--Volt-Flow/53d46baf-9588-4160-b815-9d336039fd1a/scratchpad/reimbursements.png)",
+      "Bash(npx prettier *)",
+      "Bash(npm run *)"
     ]
   }
 }
