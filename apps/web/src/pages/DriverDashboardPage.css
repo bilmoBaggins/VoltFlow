@@ -279,7 +279,9 @@
 .driver-step--current .driver-step-dot {
   border-color: var(--driver-accent-dark);
   background: var(--driver-accent-dark);
-  box-shadow: 0 0 0 3px #fff, 0 0 0 4px var(--driver-accent-dark);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 4px var(--driver-accent-dark);
 }
 
 .driver-step-label {
