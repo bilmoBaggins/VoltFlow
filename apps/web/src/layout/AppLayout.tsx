@@ -341,7 +341,11 @@ export function AppLayout() {
             >
               <BellIcon />
             </button>
-            <button type="button" className="header-user-btn" aria-haspopup="menu">
+            <button
+              type="button"
+              className="header-user-btn"
+              aria-haspopup="menu"
+            >
               <span className="header-avatar" aria-hidden="true">
                 A
               </span>
