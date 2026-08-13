@@ -183,6 +183,22 @@ function ChevronDownIcon() {
   );
 }
 
+function BellIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 2.8a4.2 4.2 0 0 0-4.2 4.2c0 3.1-1.3 4.4-1.3 4.4h11s-1.3-1.3-1.3-4.4A4.2 4.2 0 0 0 10 2.8z" />
+      <path d="M8.2 15.4a1.8 1.8 0 0 0 3.6 0" />
+    </svg>
+  );
+}
+
 type NavItemProps = {
   to?: string;
   end?: boolean;
@@ -315,6 +331,27 @@ export function AppLayout() {
       </aside>
 
       <div className="app-content">
+        <header className="top-header">
+          <div className="top-header-spacer" />
+          <div className="top-header-actions">
+            <button
+              type="button"
+              className="header-icon-btn"
+              aria-label="Notifications"
+            >
+              <BellIcon />
+            </button>
+            <button type="button" className="header-user-btn" aria-haspopup="menu">
+              <span className="header-avatar" aria-hidden="true">
+                A
+              </span>
+              <span className="header-user-name">Admin</span>
+              <span className="header-user-chevron" aria-hidden="true">
+                <ChevronDownIcon />
+              </span>
+            </button>
+          </div>
+        </header>
         <main className="app-main">
           <Outlet />
         </main>
