@@ -47,8 +47,21 @@ model Vehicle {
   gridRegion          String            @map("grid_region") @db.Char(1)
   updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
   sessions            ChargingSession[]
+  drivers             Driver[]
 
   @@map("vehicles")
+}
+
+model Driver {
+  id           String    @id @db.VarChar(32)
+  name         String    @db.VarChar(64)
+  email        String    @unique @db.VarChar(128)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  vehicleId    String?   @map("vehicle_id") @db.VarChar(32)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  vehicle      Vehicle?  @relation(fields: [vehicleId], references: [id])
+
+  @@map("drivers")
 }
 
 model ChargingSession {
