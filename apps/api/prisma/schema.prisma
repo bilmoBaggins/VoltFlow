@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum VehicleStatus {
+  idle
+  charging
+  driving
+}
+
+enum SiteType {
+  depot
+  home
+  public
+}
+
+enum SessionStatus {
+  active
+  completed
+}
+
+enum ReimbursementStatus {
+  pending
+  approved
+  paid
+  rejected
+}
+
+model Vehicle {
+  id                  String            @id @db.VarChar(32)
+  name                String            @db.VarChar(64)
+  batteryPercent      Int               @map("battery_percent") @db.UnsignedTinyInt
+  chargeRateKw        Decimal           @default(0) @map("charge_rate_kw") @db.Decimal(5, 1)
+  status              VehicleStatus     @default(idle)
+  temperatureC        Int               @map("temperature_c") @db.TinyInt
+  siteType            SiteType          @default(depot) @map("site_type")
+  batteryCapacityKwh  Decimal           @map("battery_capacity_kwh") @db.Decimal(6, 1)
+  lat                 Decimal           @db.Decimal(9, 5)
+  lng                 Decimal           @db.Decimal(9, 5)
+  locationLabel       String            @map("location_label") @db.VarChar(128)
+  postcode            String            @db.VarChar(16)
+  gridRegion          String            @map("grid_region") @db.Char(1)
+  updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  sessions            ChargingSession[]
+
+  @@map("vehicles")
+}
+
+model ChargingSession {
+  id               String           @id @db.VarChar(32)
+  vehicleId        String           @map("vehicle_id") @db.VarChar(32)
+  siteType         SiteType         @map("site_type")
+  startedAt        DateTime         @map("started_at") @db.Timestamp(0)
+  stoppedAt        DateTime?        @map("stopped_at") @db.Timestamp(0)
+  kwh              Decimal?         @db.Decimal(8, 2)
+  pricePencePerKwh Decimal?         @map("price_pence_per_kwh") @db.Decimal(8, 3)
+  costGbp          Decimal?         @map("cost_gbp") @db.Decimal(10, 2)
+  status           SessionStatus    @default(active)
+  vehicle          Vehicle          @relation(fields: [vehicleId], references: [id])
+  reimbursements   Reimbursement[]
+
+  @@map("charging_sessions")
+}
+
+model Reimbursement {
+  id        String               @id @db.VarChar(32)
+  sessionId String               @map("session_id") @db.VarChar(32)
+  driverId  String               @map("driver_id") @db.VarChar(32)
+  amountGbp Decimal              @map("amount_gbp") @db.Decimal(10, 2)
+  status    ReimbursementStatus  @default(pending)
+  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamp(0)
+  session   ChargingSession      @relation(fields: [sessionId], references: [id])
+
+  @@map("reimbursements")
+}

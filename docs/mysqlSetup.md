@@ -89,21 +89,62 @@ SELECT id, name, battery_percent, status, grid_region FROM vehicles;
 
 Use the connection details above.
 
-## Wire to the API (next step)
+## Prisma (Laravel-style migrations)
 
-The Express Fake EV API does **not** read MySQL yet. When Backend is ready:
+Schema + migrations live in `apps/api/prisma/`.
 
-1. `npm install mysql2` in `apps/api`  
-2. Read `MYSQL_*` from `.env`  
-3. Replace / optionally dual-run JSON `dataStore` with SQL queries  
+```bash
+# 1) MySQL must be running
+docker compose up -d
 
-Until then, UI can keep using `http://localhost:3001/vehicles` as today.
+# 2) API env
+cd apps/api
+cp .env.example .env   # if needed
+
+# 3) Generate client + apply migrations + seed
+npm install
+npm run prisma:generate
+npm run db:setup
+```
+
+### Everyday commands (from `apps/api`)
+
+| Command | Like Laravel | What it does |
+| :--- | :--- | :--- |
+| `npm run prisma:migrate:dev` | `artisan migrate` (dev) | Create/apply new migrations |
+| `npm run prisma:migrate` | `artisan migrate` (prod) | Apply pending migrations |
+| `npm run prisma:seed` | `db:seed` | Upsert 5 vans |
+| `npm run prisma:studio` | Tinker/UI | Browse tables in browser |
+| `npm run db:setup` | migrate + seed | First-time / reset helper |
+
+### Add a new change (example)
+
+1. Edit `apps/api/prisma/schema.prisma`  
+2. Run:
+```bash
+cd apps/api
+npx prisma migrate dev --name add_driver_id
+```
+3. Commit the new folder under `prisma/migrations/`
+
+The Fake EV API loads vehicle templates from MySQL via Prisma (falls back to `data/vehicles.json` if DB is down).
+
+## Wire to the API
+
+Already wired: `apps/api/src/db.js` + `dataStore.js` use Prisma.
+
+`DATABASE_URL` example:
+```text
+mysql://voltflow:voltflow@127.0.0.1:3307/voltflow
+```
 
 ## Troubleshooting
 
 | Problem | Fix |
 | :--- | :--- |
-| Port 3307 in use | Change host port in `docker-compose.yml` (e.g. `"3308:3306"`) and update `MYSQL_PORT` |
+| Port 3307 in use | Change host port in `docker-compose.yml` (e.g. `"3308:3306"`) and update `MYSQL_PORT` / `DATABASE_URL` |
 | Init SQL didn’t run | Init runs **only on empty volume**. Use `docker compose down -v` then `up -d` again |
+| Tables already existed before Prisma | `npx prisma migrate resolve --applied 20260813190000_init` |
 | `docker` not found | Install / start Docker Desktop, reopen terminal |
 | Auth failed | Check `.env` matches compose env; defaults are `voltflow` / `voltflow` |
+| Prisma can’t connect | Confirm `docker compose ps` healthy and `DATABASE_URL` uses port **3307** |
