@@ -21,10 +21,19 @@ CREATE TABLE IF NOT EXISTS vehicles (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(32) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  email VARCHAR(191) NOT NULL,
+  UNIQUE KEY uq_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS charging_sessions (
   id VARCHAR(32) PRIMARY KEY,
   vehicle_id VARCHAR(32) NOT NULL,
+  driver_id VARCHAR(32) NOT NULL,
   site_type ENUM('depot', 'home', 'public') NOT NULL,
+  site_label VARCHAR(128) NULL,
   started_at TIMESTAMP NOT NULL,
   stopped_at TIMESTAMP NULL,
   kwh DECIMAL(8, 2) NULL,
@@ -32,7 +41,9 @@ CREATE TABLE IF NOT EXISTS charging_sessions (
   cost_gbp DECIMAL(10, 2) NULL,
   status ENUM('active', 'completed') NOT NULL DEFAULT 'active',
   CONSTRAINT fk_session_vehicle
-    FOREIGN KEY (vehicle_id) REFERENCES vehicles (id)
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles (id),
+  CONSTRAINT fk_session_driver
+    FOREIGN KEY (driver_id) REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS reimbursements (
@@ -45,6 +56,14 @@ CREATE TABLE IF NOT EXISTS reimbursements (
   CONSTRAINT fk_reimb_session
     FOREIGN KEY (session_id) REFERENCES charging_sessions (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO users (id, name, email) VALUES
+  ('drv-01', 'John Smith', 'john.smith@voltflow.test'),
+  ('drv-02', 'Sarah Johnson', 'sarah.johnson@voltflow.test'),
+  ('drv-03', 'Michael Brown', 'michael.brown@voltflow.test'),
+  ('drv-04', 'Emily Davis', 'emily.davis@voltflow.test'),
+  ('drv-05', 'James Wilson', 'james.wilson@voltflow.test')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
 
 INSERT INTO vehicles (
   id, name, battery_percent, charge_rate_kw, status, temperature_c,

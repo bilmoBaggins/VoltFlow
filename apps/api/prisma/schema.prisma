@@ -54,7 +54,9 @@ model Vehicle {
 model ChargingSession {
   id               String           @id @db.VarChar(32)
   vehicleId        String           @map("vehicle_id") @db.VarChar(32)
+  driverId         String           @map("driver_id") @db.VarChar(32)
   siteType         SiteType         @map("site_type")
+  siteLabel        String?          @map("site_label") @db.VarChar(128)
   startedAt        DateTime         @map("started_at") @db.Timestamp(0)
   stoppedAt        DateTime?        @map("stopped_at") @db.Timestamp(0)
   kwh              Decimal?         @db.Decimal(8, 2)
@@ -62,9 +64,19 @@ model ChargingSession {
   costGbp          Decimal?         @map("cost_gbp") @db.Decimal(10, 2)
   status           SessionStatus    @default(active)
   vehicle          Vehicle          @relation(fields: [vehicleId], references: [id])
+  driver            User            @relation(fields: [driverId], references: [id])
   reimbursements   Reimbursement[]
 
   @@map("charging_sessions")
+}
+
+model User {
+  id       String            @id @db.VarChar(32)
+  name     String            @db.VarChar(128)
+  email    String            @unique @db.VarChar(191)
+  sessions ChargingSession[]
+
+  @@map("users")
 }
 
 model Reimbursement {
