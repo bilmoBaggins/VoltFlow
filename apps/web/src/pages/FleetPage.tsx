@@ -94,9 +94,7 @@ function SiteIcon({ site }: { site: SiteType }) {
 
 function locationText(vehicle: Vehicle): string {
   return (
-    REGION_LABELS[vehicle.location.gridRegion] ??
-    vehicle.location.label ??
-    "UK"
+    REGION_LABELS[vehicle.location.gridRegion] ?? vehicle.location.label ?? "UK"
   );
 }
 
@@ -135,7 +133,9 @@ export function FleetPage() {
       <div className="fleet-page-head">
         <div>
           <h1>Fleet</h1>
-          <p className="page-owner">Live Fake EV data · refresh for new values</p>
+          <p className="page-owner">
+            Live Fake EV data · refresh for new values
+          </p>
         </div>
         <button
           className="btn"
