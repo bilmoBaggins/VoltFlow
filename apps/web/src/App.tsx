@@ -3,9 +3,11 @@ import { AppLayout } from "./layout/AppLayout";
 import { AiAdvisorPage } from "./pages/AiAdvisorPage";
 import { DriverDashboardPage } from "./pages/DriverDashboardPage";
 import { FleetPage } from "./pages/FleetPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ReimbursementsPage } from "./pages/ReimbursementsPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SessionsPage } from "./pages/SessionsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { VehiclePage } from "./pages/VehiclePage";
@@ -18,6 +20,8 @@ export default function App() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify-email" element={<VerifyOtpPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
         <Route element={<AppLayout />}>
           <Route index element={<FleetPage />} />
           <Route path="vehicle/:id" element={<VehiclePage />} />
