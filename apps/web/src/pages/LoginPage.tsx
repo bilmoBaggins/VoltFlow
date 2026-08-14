@@ -1,17 +1,14 @@
 /**
  * Login — VoltFlow fleet charging portal
  * Mockup: docs/mockups/voltflow-login.png
- * Auth: JWT-lite demo login (no backend endpoint yet) — accepts the demo
- * admin credentials and stores a lightweight session flag locally.
+ * Auth: calls POST /auth/login on the API and stores the returned JWT.
  */
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ApiError, loginUser } from "../api/client";
+import { storeAuth } from "../api/auth";
 import "./LoginPage.css";
-
-const DEMO_EMAIL = "admin@voltflow.com";
-const DEMO_PASSWORD = "voltflow-demo";
-const AUTH_STORAGE_KEY = "voltflow_demo_auth";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -20,22 +17,26 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
 
-    if (
-      email.trim().toLowerCase() === DEMO_EMAIL &&
-      password === DEMO_PASSWORD
-    ) {
-      localStorage.setItem(AUTH_STORAGE_KEY, "true");
-      navigate("/sessions");
-      return;
-    }
+    const normalizedEmail = email.trim().toLowerCase();
 
-    setError("Invalid email or password. Use the demo admin credentials.");
-    setSubmitting(false);
+    try {
+      const auth = await loginUser(normalizedEmail, password);
+      storeAuth(auth);
+      navigate("/sessions");
+    } catch (err) {
+      if (err instanceof ApiError && err.body?.requiresVerification) {
+        navigate(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`);
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Invalid email or password.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -71,7 +72,7 @@ export function LoginPage() {
               id="login-email"
               type="email"
               className="login-input"
-              placeholder="admin@voltflow.com"
+              placeholder="you@voltflow.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
@@ -133,28 +134,7 @@ export function LoginPage() {
         <hr className="login-divider" />
 
         <p className="login-note">
-          <svg
-            className="login-note-icon"
-            viewBox="0 0 20 20"
-            aria-hidden="true"
-          >
-            <circle
-              cx="10"
-              cy="10"
-              r="8"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-            />
-            <path
-              d="M10 9v4.5 M10 6.5v.01"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          </svg>
-          Use demo admin credentials: {DEMO_EMAIL} / {DEMO_PASSWORD}
+          Don't have an account? <Link to="/register">Create one</Link>
         </p>
       </div>
     </div>

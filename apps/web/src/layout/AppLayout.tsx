@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { clearAuth, getStoredUser } from "../api/auth";
 import "./AppLayout.css";
 
 function ZapIcon() {
@@ -231,6 +232,7 @@ function NavItem({ to, end, icon, label, disabled }: NavItemProps) {
 
 export function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isReimbursementsActive =
     location.pathname.startsWith("/reimbursements");
   const [reimbursementsOpen, setReimbursementsOpen] = useState(
@@ -239,6 +241,30 @@ export function AppLayout() {
   const [prevReimbursementsActive, setPrevReimbursementsActive] = useState(
     isReimbursementsActive,
   );
+
+  const user = getStoredUser();
+  const displayName = user?.name ?? "Admin";
+  const avatarInitial = displayName.trim().charAt(0).toUpperCase() || "A";
+
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
+
+  function handleSignOut() {
+    clearAuth();
+    setUserMenuOpen(false);
+    navigate("/login");
+  }
 
   // Adjusting state during render (not in an effect) on navigating into
   // /reimbursements — see https://react.dev/learn/you-might-not-need-an-effect
@@ -341,19 +367,35 @@ export function AppLayout() {
             >
               <BellIcon />
             </button>
-            <button
-              type="button"
-              className="header-user-btn"
-              aria-haspopup="menu"
-            >
-              <span className="header-avatar" aria-hidden="true">
-                A
-              </span>
-              <span className="header-user-name">Admin</span>
-              <span className="header-user-chevron" aria-hidden="true">
-                <ChevronDownIcon />
-              </span>
-            </button>
+            <div className="header-user" ref={userMenuRef}>
+              <button
+                type="button"
+                className="header-user-btn"
+                aria-haspopup="menu"
+                aria-expanded={userMenuOpen}
+                onClick={() => setUserMenuOpen((open) => !open)}
+              >
+                <span className="header-avatar" aria-hidden="true">
+                  {avatarInitial}
+                </span>
+                <span className="header-user-name">{displayName}</span>
+                <span className="header-user-chevron" aria-hidden="true">
+                  <ChevronDownIcon />
+                </span>
+              </button>
+              {userMenuOpen && (
+                <div className="header-user-menu" role="menu">
+                  <button
+                    type="button"
+                    className="header-user-menu-item"
+                    role="menuitem"
+                    onClick={handleSignOut}
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
         <main className="app-main">

@@ -70,14 +70,17 @@ model Driver {
 }
 
 model User {
-  id           String            @id @default(cuid()) @db.VarChar(32)
-  email        String            @unique @db.VarChar(255)
-  passwordHash String            @map("password_hash") @db.VarChar(255)
-  name         String            @db.VarChar(128)
-  role         UserRole          @default(driver)
-  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt    DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
-  sessions     ChargingSession[]
+  id            String            @id @default(cuid()) @db.VarChar(32)
+  email         String            @unique @db.VarChar(255)
+  passwordHash  String            @map("password_hash") @db.VarChar(255)
+  name          String            @db.VarChar(128)
+  role          UserRole          @default(driver)
+  emailVerified Boolean           @default(false) @map("email_verified")
+  otpCodeHash   String?           @map("otp_code_hash") @db.VarChar(255)
+  otpExpiresAt  DateTime?         @map("otp_expires_at") @db.Timestamp(0)
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  sessions      ChargingSession[]
 
   @@map("users")
 }
