@@ -105,7 +105,7 @@ cp .env.example .env   # if needed
 npm install
 npm run prisma:generate
 npm run db:setup
-```
+``` 
 
 ### Everyday commands (from `apps/api`)
 
