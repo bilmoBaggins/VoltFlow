@@ -35,7 +35,16 @@
       "Bash(taskkill //PID 17780 //F)",
       "Bash(curl -s -o /dev/null -w \"5173:%{http_code}\\\\n\" http://localhost:5173/login)",
       "Bash(gh pr *)",
-      "Bash(gh run *)"
+      "Bash(gh run *)",
+      "Bash(curl -s -X POST http://localhost:3001/auth/verify-otp -H \"Content-Type: application/json\" -d '{\"email\":\"design.preview@example.com\",\"otp\":\"607875\"}')",
+      "Bash(curl -s -X DELETE http://localhost:8025/api/v1/messages)",
+      "Bash(awk '{print $5}')",
+      "Bash(xargs -r -I{} taskkill //PID {} //F)",
+      "Bash(curl -s \"http://localhost:8025/api/v1/messages\")",
+      "Bash(curl -s -X POST http://localhost:3001/auth/reset-password -H 'Content-Type: application/json' -d '{\"email\":\"reset.tester@example.com\",\"otp\":\"000000\",\"password\":\"newpassword1\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/auth/reset-password -H 'Content-Type: application/json' -d '{\"email\":\"reset.tester@example.com\",\"otp\":\"534489\",\"password\":\"short\"}')",
+      "Bash(curl -s -X POST http://localhost:3001/auth/reset-password -H 'Content-Type: application/json' -d '{\"email\":\"reset.tester@example.com\",\"otp\":\"534489\",\"password\":\"newpassword1\"}')",
+      "Bash(echo \"exit:$?\")"
     ]
   }
 }

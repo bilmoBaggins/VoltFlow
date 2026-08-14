@@ -1,19 +1,17 @@
 /**
- * Login — VoltFlow fleet charging portal
- * Mockup: docs/mockups/voltflow-login.png
- * Auth: calls POST /auth/login on the API and stores the returned JWT.
+ * Forgot password — VoltFlow fleet charging portal
+ * Asks POST /auth/forgot-password to email a one-time reset code, then hands
+ * off to /reset-password where the code is exchanged for a new password.
  */
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ApiError, loginUser } from "../api/client";
-import { storeAuth } from "../api/auth";
+import { requestPasswordReset } from "../api/client";
 import "./LoginPage.css";
 
-export function LoginPage() {
+export function ForgotPasswordPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,19 +20,13 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
 
-    const normalizedEmail = email.trim().toLowerCase();
-
     try {
-      const auth = await loginUser(normalizedEmail, password);
-      storeAuth(auth);
-      navigate("/sessions");
+      const normalizedEmail = email.trim().toLowerCase();
+      await requestPasswordReset(normalizedEmail);
+      navigate(`/reset-password?email=${encodeURIComponent(normalizedEmail)}`);
     } catch (err) {
-      if (err instanceof ApiError && err.body?.requiresVerification) {
-        navigate(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`);
-        return;
-      }
       setError(
-        err instanceof Error ? err.message : "Invalid email or password.",
+        err instanceof Error ? err.message : "Could not send a reset code.",
       );
     } finally {
       setSubmitting(false);
@@ -51,27 +43,36 @@ export function LoginPage() {
             aria-hidden="true"
           >
             <defs>
-              <linearGradient id="volt-mark-grad" x1="0" y1="0" x2="1" y2="1">
+              <linearGradient
+                id="volt-mark-grad-forgot"
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="1"
+              >
                 <stop offset="0" stopColor="#6fd6c9" />
                 <stop offset="1" stopColor="#199c8b" />
               </linearGradient>
             </defs>
             <path
               d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"
-              fill="url(#volt-mark-grad)"
+              fill="url(#volt-mark-grad-forgot)"
             />
           </svg>
           <span className="login-brand-name">VoltFlow</span>
         </div>
-        <p className="login-subtitle">Fleet charging portal</p>
+        <p className="login-subtitle">
+          Enter your email and we&apos;ll send you a code to reset your
+          password.
+        </p>
 
         <form className="login-form" onSubmit={handleSubmit}>
-          <label className="login-label" htmlFor="login-email">
+          <label className="login-label" htmlFor="forgot-email">
             Email
           </label>
           <div className="login-input-wrap">
             <input
-              id="login-email"
+              id="forgot-email"
               type="email"
               className="login-input"
               placeholder="you@voltflow.com"
@@ -94,34 +95,6 @@ export function LoginPage() {
             </svg>
           </div>
 
-          <label className="login-label" htmlFor="login-password">
-            Password
-          </label>
-          <div className="login-input-wrap">
-            <input
-              id="login-password"
-              type="password"
-              className="login-input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="current-password"
-              required
-            />
-            <svg
-              className="login-input-icon"
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-            >
-              <path
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                d="M5 9V6a5 5 0 0 1 10 0v3 M4 9h12v8H4z"
-              />
-            </svg>
-          </div>
-
           {error && (
             <p className="login-error" role="alert">
               {error}
@@ -129,18 +102,14 @@ export function LoginPage() {
           )}
 
           <button type="submit" className="login-submit" disabled={submitting}>
-            {submitting ? "Signing in…" : "Sign in"}
+            {submitting ? "Sending code…" : "Send reset code"}
           </button>
         </form>
 
         <hr className="login-divider" />
 
         <p className="login-note">
-          Don&apos;t have an account? <Link to="/register">Create one</Link>
-          <span className="login-note-sep" aria-hidden="true">
-            ·
-          </span>
-          <Link to="/forgot-password">Forgot password?</Link>
+          <Link to="/login">Back to sign in</Link>
         </p>
       </div>
     </div>
