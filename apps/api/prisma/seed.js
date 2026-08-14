@@ -3,11 +3,41 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const users = [
-  { id: "drv-01", name: "John Smith", email: "john.smith@voltflow.test" },
-  { id: "drv-02", name: "Sarah Johnson", email: "sarah.johnson@voltflow.test" },
-  { id: "drv-03", name: "Michael Brown", email: "michael.brown@voltflow.test" },
-  { id: "drv-04", name: "Emily Davis", email: "emily.davis@voltflow.test" },
-  { id: "drv-05", name: "James Wilson", email: "james.wilson@voltflow.test" },
+  {
+    id: "drv-01",
+    name: "John Smith",
+    email: "john.smith@voltflow.test",
+    passwordHash: "demo-hash",
+    role: "driver",
+  },
+  {
+    id: "drv-02",
+    name: "Sarah Johnson",
+    email: "sarah.johnson@voltflow.test",
+    passwordHash: "demo-hash",
+    role: "driver",
+  },
+  {
+    id: "drv-03",
+    name: "Michael Brown",
+    email: "michael.brown@voltflow.test",
+    passwordHash: "demo-hash",
+    role: "driver",
+  },
+  {
+    id: "drv-04",
+    name: "Emily Davis",
+    email: "emily.davis@voltflow.test",
+    passwordHash: "demo-hash",
+    role: "driver",
+  },
+  {
+    id: "drv-05",
+    name: "James Wilson",
+    email: "james.wilson@voltflow.test",
+    passwordHash: "demo-hash",
+    role: "driver",
+  },
 ];
 
 const vehicles = [

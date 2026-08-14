@@ -4,7 +4,7 @@ services:
     container_name: voltflow-mysql
     restart: unless-stopped
     ports:
-      - "3307:3306"
+      - "3309:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-voltflow_root}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-voltflow}

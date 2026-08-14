@@ -6,7 +6,7 @@ CREATE TABLE `users` (
 
   UNIQUE INDEX `users_email_key`(`email`),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
 ALTER TABLE `charging_sessions`
