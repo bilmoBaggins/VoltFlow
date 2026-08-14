@@ -12,7 +12,11 @@ export class ApiError extends Error {
   status: number;
   body: Record<string, unknown> | null;
 
-  constructor(status: number, message: string, body: Record<string, unknown> | null) {
+  constructor(
+    status: number,
+    message: string,
+    body: Record<string, unknown> | null,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -45,7 +49,10 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
-export function loginUser(email: string, password: string): Promise<AuthResponse> {
+export function loginUser(
+  email: string,
+  password: string,
+): Promise<AuthResponse> {
   return postJson<AuthResponse>("/auth/login", { email, password });
 }
 
@@ -54,7 +61,11 @@ export function registerUser(
   email: string,
   password: string,
 ): Promise<RegisterResponse> {
-  return postJson<RegisterResponse>("/auth/register", { name, email, password });
+  return postJson<RegisterResponse>("/auth/register", {
+    name,
+    email,
+    password,
+  });
 }
 
 export function verifyOtp(email: string, otp: string): Promise<AuthResponse> {

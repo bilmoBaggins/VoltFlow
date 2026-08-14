@@ -33,7 +33,9 @@ export function LoginPage() {
         navigate(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`);
         return;
       }
-      setError(err instanceof Error ? err.message : "Invalid email or password.");
+      setError(
+        err instanceof Error ? err.message : "Invalid email or password.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -134,7 +136,7 @@ export function LoginPage() {
         <hr className="login-divider" />
 
         <p className="login-note">
-          Don't have an account? <Link to="/register">Create one</Link>
+          Don&apos;t have an account? <Link to="/register">Create one</Link>
         </p>
       </div>
     </div>

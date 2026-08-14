@@ -33,7 +33,9 @@ export function VerifyOtpPage() {
       storeAuth(auth);
       navigate("/sessions");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not verify that code.");
+      setError(
+        err instanceof Error ? err.message : "Could not verify that code.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -58,7 +60,9 @@ export function VerifyOtpPage() {
         });
       }, 1000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not resend the code.");
+      setError(
+        err instanceof Error ? err.message : "Could not resend the code.",
+      );
     }
   }
 
@@ -151,14 +155,16 @@ export function VerifyOtpPage() {
         <hr className="login-divider" />
 
         <p className="login-note">
-          Didn't get a code?{" "}
+          Didn&apos;t get a code?{" "}
           <button
             type="button"
             className="login-link-button"
             onClick={handleResend}
             disabled={resendCooldown > 0 || !email}
           >
-            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+            {resendCooldown > 0
+              ? `Resend in ${resendCooldown}s`
+              : "Resend code"}
           </button>
         </p>
         <p className="login-note">
