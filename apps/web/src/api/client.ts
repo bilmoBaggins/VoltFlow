@@ -76,6 +76,22 @@ export function resendOtp(email: string): Promise<MessageResponse> {
   return postJson<MessageResponse>("/auth/resend-otp", { email });
 }
 
+export function requestPasswordReset(email: string): Promise<MessageResponse> {
+  return postJson<MessageResponse>("/auth/forgot-password", { email });
+}
+
+export function resetPassword(
+  email: string,
+  otp: string,
+  password: string,
+): Promise<AuthResponse> {
+  return postJson<AuthResponse>("/auth/reset-password", {
+    email,
+    otp,
+    password,
+  });
+}
+
 export function fetchVehicles(): Promise<Vehicle[]> {
   return getJson<Vehicle[]>("/vehicles");
 }

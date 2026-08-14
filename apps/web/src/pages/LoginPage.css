@@ -155,6 +155,11 @@
   text-decoration: underline;
 }
 
+.login-note-sep {
+  margin: 0 0.4rem;
+  color: #a8b8b1;
+}
+
 .login-link-button {
   background: none;
   border: none;
