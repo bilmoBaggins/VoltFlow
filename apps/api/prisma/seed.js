@@ -9,6 +9,7 @@ const users = [
     email: "john.smith@voltflow.test",
     passwordHash: "demo-hash",
     role: "driver",
+    emailVerified: true,
   },
   {
     id: "drv-02",
@@ -16,6 +17,7 @@ const users = [
     email: "sarah.johnson@voltflow.test",
     passwordHash: "demo-hash",
     role: "driver",
+    emailVerified: true,
   },
   {
     id: "drv-03",
@@ -23,6 +25,7 @@ const users = [
     email: "michael.brown@voltflow.test",
     passwordHash: "demo-hash",
     role: "driver",
+    emailVerified: true,
   },
   {
     id: "drv-04",
@@ -30,6 +33,7 @@ const users = [
     email: "emily.davis@voltflow.test",
     passwordHash: "demo-hash",
     role: "driver",
+    emailVerified: true,
   },
   {
     id: "drv-05",
@@ -37,6 +41,7 @@ const users = [
     email: "james.wilson@voltflow.test",
     passwordHash: "demo-hash",
     role: "driver",
+    emailVerified: true,
   },
 ];
 
