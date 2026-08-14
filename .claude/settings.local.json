@@ -35,7 +35,9 @@
       "Bash(taskkill //PID 17780 //F)",
       "Bash(curl -s -o /dev/null -w \"5173:%{http_code}\\\\n\" http://localhost:5173/login)",
       "Bash(gh pr *)",
-      "Bash(gh run *)"
+      "Bash(gh run *)",
+      "Bash(git commit *)",
+      "Bash(git fetch *)"
     ]
   }
 }
