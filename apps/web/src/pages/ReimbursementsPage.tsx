@@ -1,254 +1,117 @@
 /**
  * OWNER: Student 4 — Home reimbursement queue
  * Mockup: docs/mockups/voltflow-reimbursement-queue.png
- * Mock data for now — API later: GET /reimbursements?status=pending, approve / mark-paid
+ * Data: GET /reimbursements?status=pending, PATCH /reimbursements/:id/status
  */
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { fetchReimbursements, updateReimbursementStatus } from "../api/client";
+import type { ClaimStatus, ReimbursementClaim } from "../types/reimbursement";
 import "./ReimbursementsPage.css";
 
-type ClaimStatus = "pending" | "approved" | "paid" | "rejected";
+/** Seeded charging times are UK local wall-clock times; render them as stored. */
+const DATE_FMT = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
 
-interface ReimbursementClaim {
-  id: string;
-  driverName: string;
-  driverId: string;
-  vehicleModel: string;
-  plate: string;
-  energyKwh: number;
-  priceP: number;
-  date: string;
-  time: string;
-  status: ClaimStatus;
-  location: string;
-  gridRegion: string;
-  tariff: string;
-  source: string;
-  notes: string;
+const TIME_FMT = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "UTC",
+});
+
+function formatDate(iso: string): string {
+  return DATE_FMT.format(new Date(iso));
 }
 
-const INITIAL_CLAIMS: ReimbursementClaim[] = [
-  {
-    id: "CLM-2026-0807-001",
-    driverName: "Olivia Smith",
-    driverId: "DRV-1048",
-    vehicleModel: "Tesla Model Y",
-    plate: "LR72 HCP",
-    energyKwh: 42.31,
-    priceP: 29.9,
-    date: "7 Aug 2026",
-    time: "07:15",
-    status: "pending",
-    location: "London, Home",
-    gridRegion: "C",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0806-004",
-    driverName: "James Wright",
-    driverId: "DRV-1023",
-    vehicleModel: "Kia EV6",
-    plate: "LC71 FZD",
-    energyKwh: 37.84,
-    priceP: 29.92,
-    date: "6 Aug 2026",
-    time: "22:40",
-    status: "pending",
-    location: "Leeds, Home",
-    gridRegion: "M",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0805-002",
-    driverName: "Emma Harris",
-    driverId: "DRV-1077",
-    vehicleModel: "Hyundai IONIQ 5",
-    plate: "EN21 ZYT",
-    energyKwh: 51.62,
-    priceP: 29.97,
-    date: "5 Aug 2026",
-    time: "06:05",
-    status: "pending",
-    location: "Bristol, Home",
-    gridRegion: "L",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0801-001",
-    driverName: "Ryan Walsh",
-    driverId: "DRV-1140",
-    vehicleModel: "Ford Mustang Mach-E",
-    plate: "NC20 JWR",
-    energyKwh: 56.3,
-    priceP: 26.95,
-    date: "1 Aug 2026",
-    time: "05:30",
-    status: "pending",
-    location: "Newcastle, Home",
-    gridRegion: "F",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0802-002",
-    driverName: "Daniel Clarke",
-    driverId: "DRV-1129",
-    vehicleModel: "BMW i4",
-    plate: "LV22 QWE",
-    energyKwh: 39.75,
-    priceP: 30.1,
-    date: "2 Aug 2026",
-    time: "06:45",
-    status: "pending",
-    location: "Liverpool, Home",
-    gridRegion: "D",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0802-009",
-    driverName: "Megan Foster",
-    driverId: "DRV-1177",
-    vehicleModel: "Renault Megane E-Tech",
-    plate: "KT77 LMN",
-    energyKwh: 36.85,
-    priceP: 31.2,
-    date: "2 Aug 2026",
-    time: "22:00",
-    status: "pending",
-    location: "Maidstone, Home",
-    gridRegion: "J",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0803-005",
-    driverName: "Sophie Turner",
-    driverId: "DRV-1115",
-    vehicleModel: "VW ID.4",
-    plate: "NG68 RPX",
-    energyKwh: 45.1,
-    priceP: 27.85,
-    date: "3 Aug 2026",
-    time: "23:05",
-    status: "pending",
-    location: "Nottingham, Home",
-    gridRegion: "B",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0804-003",
-    driverName: "Liam Brown",
-    driverId: "DRV-1102",
-    vehicleModel: "Nissan Leaf",
-    plate: "BD19 MKL",
-    energyKwh: 33.2,
-    priceP: 28.4,
-    date: "4 Aug 2026",
-    time: "19:20",
-    status: "pending",
-    location: "Cambridge, Home",
-    gridRegion: "A",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0804-008",
-    driverName: "Harry Osei",
-    driverId: "DRV-1163",
-    vehicleModel: "Skoda Enyaq",
-    plate: "SO18 ZQP",
-    energyKwh: 44.6,
-    priceP: 27.1,
-    date: "4 Aug 2026",
-    time: "07:50",
-    status: "pending",
-    location: "Southampton, Home",
-    gridRegion: "H",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0805-010",
-    driverName: "Callum Reid",
-    driverId: "DRV-1188",
-    vehicleModel: "Audi Q4 e-tron",
-    plate: "CF44 VBN",
-    energyKwh: 50.15,
-    priceP: 28.05,
-    date: "5 Aug 2026",
-    time: "18:35",
-    status: "pending",
-    location: "Cardiff, Home",
-    gridRegion: "K",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0806-007",
-    driverName: "Chloe Bennett",
-    driverId: "DRV-1152",
-    vehicleModel: "MG4",
-    plate: "MA69 GHT",
-    energyKwh: 41.05,
-    priceP: 29.35,
-    date: "6 Aug 2026",
-    time: "20:15",
-    status: "pending",
-    location: "Manchester, Home",
-    gridRegion: "G",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0808-006",
-    driverName: "Priya Patel",
-    driverId: "DRV-1134",
-    vehicleModel: "Polestar 2",
-    plate: "BM71 XYT",
-    energyKwh: 48.9,
-    priceP: 28.75,
-    date: "8 Aug 2026",
-    time: "21:10",
-    status: "pending",
-    location: "Birmingham, Home",
-    gridRegion: "E",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-  {
-    id: "CLM-2026-0809-011",
-    driverName: "Isla Campbell",
-    driverId: "DRV-1199",
-    vehicleModel: "Tesla Model 3",
-    plate: "ED12 QRS",
-    energyKwh: 38.4,
-    priceP: 29.6,
-    date: "9 Aug 2026",
-    time: "06:10",
-    status: "pending",
-    location: "Edinburgh, Home",
-    gridRegion: "N",
-    tariff: "Octopus Agile (Flexible)",
-    source: "Charge point telemetry",
-    notes: "–",
-  },
-];
+function formatTime(iso: string): string {
+  return TIME_FMT.format(new Date(iso));
+}
+
+/** Matches the row density in the mockup. */
+const PAGE_SIZE = 3;
+
+/** One entry per filterable column; all values are raw input strings. */
+interface Filters {
+  driver: string;
+  vehicle: string;
+  energyMin: string;
+  energyMax: string;
+  amountMin: string;
+  amountMax: string;
+  dateFrom: string;
+  dateTo: string;
+  status: string;
+}
+
+/** Opens on the pending queue, which is what this page is named for. */
+const EMPTY_FILTERS: Filters = {
+  driver: "",
+  vehicle: "",
+  energyMin: "",
+  energyMax: "",
+  amountMin: "",
+  amountMax: "",
+  dateFrom: "",
+  dateTo: "",
+  status: "pending",
+};
+
+function isEmptyFilters(filters: Filters): boolean {
+  return (Object.keys(filters) as (keyof Filters)[]).every(
+    (key) => filters[key] === EMPTY_FILTERS[key],
+  );
+}
+
+function includesText(haystack: string, needle: string): boolean {
+  return haystack.toLowerCase().includes(needle.trim().toLowerCase());
+}
+
+/** Blank bounds are ignored; a non-numeric bound is treated as blank. */
+function withinRange(value: number, min: string, max: string): boolean {
+  const lower = Number.parseFloat(min);
+  const upper = Number.parseFloat(max);
+  if (!Number.isNaN(lower) && value < lower) return false;
+  if (!Number.isNaN(upper) && value > upper) return false;
+  return true;
+}
+
+function matchesFilters(claim: ReimbursementClaim, filters: Filters): boolean {
+  if (filters.status && claim.status !== filters.status) return false;
+
+  if (
+    filters.driver.trim() &&
+    !includesText(`${claim.driverName} ${claim.driverId}`, filters.driver)
+  ) {
+    return false;
+  }
+
+  if (
+    filters.vehicle.trim() &&
+    !includesText(`${claim.vehicleModel} ${claim.plate}`, filters.vehicle)
+  ) {
+    return false;
+  }
+
+  if (!withinRange(claim.energyKwh, filters.energyMin, filters.energyMax)) {
+    return false;
+  }
+
+  if (!withinRange(amountFor(claim), filters.amountMin, filters.amountMax)) {
+    return false;
+  }
+
+  // chargedAt is UTC and rendered as UTC, so comparing the date part as a
+  // string matches what the Date column actually shows.
+  const day = claim.chargedAt.slice(0, 10);
+  if (filters.dateFrom && day < filters.dateFrom) return false;
+  if (filters.dateTo && day > filters.dateTo) return false;
+
+  return true;
+}
 
 function initials(name: string): string {
   return name
@@ -259,8 +122,9 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
+/** The API already computes the payable amount; fall back for older rows. */
 function amountFor(claim: ReimbursementClaim): number {
-  return (claim.energyKwh * claim.priceP) / 100;
+  return claim.amountGbp ?? (claim.energyKwh * claim.priceP) / 100;
 }
 
 const STEPS: { key: ClaimStatus; label: string }[] = [
@@ -274,54 +138,18 @@ function stepIndex(status: ClaimStatus): number {
   return STEPS.findIndex((s) => s.key === status);
 }
 
-function IconMenu() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    >
-      <path d="M3 6h18M3 12h18M3 18h18" />
-    </svg>
-  );
+/**
+ * Gold marks a claim still waiting on a decision, so it applies only while the
+ * claim is pending — once approved or paid, the steps reached are green.
+ * Rejected claims render a plain badge instead of this stepper.
+ */
+function stepState(status: ClaimStatus, i: number): string {
+  const idx = stepIndex(status);
+  if (i < idx) return "done";
+  if (i === idx) return status === "pending" ? "current" : "done";
+  return "upcoming";
 }
-function IconBell() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
-  );
-}
-function IconChevronDown() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
+
 function IconRefresh() {
   return (
     <svg
@@ -475,42 +303,95 @@ function IconNote() {
   );
 }
 
-const NAV_ITEMS = [
-  { label: "Overview", icon: "🚗" },
-  { label: "Vehicles", icon: "🚙" },
-  { label: "Drivers", icon: "🧑" },
-  { label: "Charging", icon: "⚡" },
-  { label: "Reimbursements", icon: "📄", active: true },
-  { label: "Reports", icon: "📊" },
-  { label: "Settings", icon: "⚙️" },
-  { label: "Integrations", icon: "🔗" },
-];
-
 export function ReimbursementsPage() {
-  const [claims, setClaims] = useState<ReimbursementClaim[]>(INITIAL_CLAIMS);
-  const pending = claims.filter((c) => c.status === "pending");
-  const [selectedId, setSelectedId] = useState<string | null>(
-    pending[0]?.id ?? null,
-  );
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [claims, setClaims] = useState<ReimbursementClaim[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actioningId, setActioningId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  /** Claim awaiting a rejection reason, and the reason being typed. */
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [requestedPage, setRequestedPage] = useState(1);
 
+  const pending = useMemo(
+    () => claims.filter((claim) => matchesFilters(claim, filters)),
+    [claims, filters],
+  );
   const selected = claims.find((c) => c.id === selectedId) ?? null;
+  const filtersActive = !isEmptyFilters(filters);
 
-  function setStatus(id: string, status: ClaimStatus) {
-    setClaims((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
-    setSelectedId((current) => {
-      if (current !== id) return current;
-      const remaining = claims.filter(
-        (c) => c.status === "pending" && c.id !== id,
-      );
-      return remaining[0]?.id ?? null;
-    });
+  const totalPages = Math.max(1, Math.ceil(pending.length / PAGE_SIZE));
+  // Derived rather than stored, so the page stays valid when filtering or
+  // actioning shrinks the list out from under it.
+  const page = Math.min(requestedPage, totalPages);
+  const firstIndex = (page - 1) * PAGE_SIZE;
+  const visible = pending.slice(firstIndex, firstIndex + PAGE_SIZE);
+
+  function setFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setRequestedPage(1);
   }
 
-  function resetDemo() {
-    setClaims(INITIAL_CLAIMS);
-    setSelectedId(INITIAL_CLAIMS[0].id);
+  function resetFilters() {
+    setFilters(EMPTY_FILTERS);
+    setRequestedPage(1);
+  }
+
+  /**
+   * Every claim is fetched so the status filter can reach decided ones; the
+   * filter defaults to pending, which is the queue this page is named for.
+   */
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setClaims(await fetchReimbursements());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load claims");
+      setClaims([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  /**
+   * The actioned claim stays in the table showing its new status, so the
+   * decision is visible straight away. It leaves the default view on the next
+   * reload, when the pending filter is reapplied.
+   */
+  async function setStatus(id: string, status: ClaimStatus, notes?: string) {
+    setActioningId(id);
+    setError(null);
+    try {
+      const updated = await updateReimbursementStatus(id, status, notes);
+      setClaims((prev) => prev.map((c) => (c.id === id ? updated : c)));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : `Failed to ${status} the claim`,
+      );
+    } finally {
+      setActioningId(null);
+    }
+  }
+
+  function openRejectDialog(id: string) {
+    setRejectingId(id);
+    setRejectReason("");
+  }
+
+  async function confirmReject() {
+    const id = rejectingId;
+    const reason = rejectReason.trim();
+    if (!id || reason === "") return;
+    setRejectingId(null);
+    await setStatus(id, "rejected", reason);
   }
 
   async function copyClaimId(id: string) {
@@ -525,160 +406,186 @@ export function ReimbursementsPage() {
 
   return (
     <div className="rb-shell">
-      <aside className={`rb-sidebar ${sidebarOpen ? "is-open" : ""}`}>
-        <div className="rb-logo">
-          <span className="rb-logo-mark">⚡</span>
-          <span className="rb-logo-text">VoltFlow</span>
-        </div>
-
-        <nav className="rb-nav" aria-label="Main">
-          {NAV_ITEMS.map((item) => (
-            <div key={item.label}>
-              <button
-                type="button"
-                className={`rb-nav-link ${item.active ? "active" : ""}`}
-              >
-                <span className="rb-nav-icon" aria-hidden="true">
-                  {item.icon}
-                </span>
-                {item.label}
-              </button>
-              {item.active && (
-                <div className="rb-subnav">
-                  <button type="button" className="rb-subnav-link active">
-                    Queue
-                  </button>
-                  <button type="button" className="rb-subnav-link">
-                    History
-                  </button>
-                </div>
-              )}
+      <div className={selected ? "rb-content" : "rb-content is-full"}>
+        <section className="rb-queue">
+          <div className="rb-queue-head">
+            <div>
+              <h1>Pending reimbursements</h1>
+              <p className="rb-subtitle">
+                Review and action home charging claims submitted by drivers.
+              </p>
             </div>
-          ))}
-        </nav>
-
-        <div className="rb-org">
-          <span className="rb-org-icon" aria-hidden="true">
-            🏢
-          </span>
-          <div className="rb-org-text">
-            <strong>Acme Logistics</strong>
-            <span>Enterprise</span>
-          </div>
-          <IconChevronDown />
-        </div>
-      </aside>
-
-      <div className="rb-main">
-        <header className="rb-topbar">
-          <div className="rb-topbar-left">
-            <button
-              type="button"
-              className="rb-icon-btn rb-menu-btn"
-              onClick={() => setSidebarOpen((o) => !o)}
-              aria-label="Toggle navigation"
-            >
-              <IconMenu />
-            </button>
-            <div className="rb-breadcrumb">
-              <span className="muted">Home</span>
-              <span className="muted"> / </span>
-              <span>Reimbursements</span>
-            </div>
-          </div>
-          <div className="rb-topbar-right">
             <button
               type="button"
               className="rb-icon-btn"
-              aria-label="Notifications"
+              onClick={() => void load()}
+              aria-label="Refresh"
+              title="Reload claims"
+              disabled={loading}
             >
-              <IconBell />
+              <IconRefresh />
             </button>
-            <div className="rb-user">
-              <span className="rb-avatar">AM</span>
-              <div className="rb-user-text">
-                <strong>Alex Morgan</strong>
-                <span>Fleet Admin</span>
-              </div>
-              <IconChevronDown />
-            </div>
           </div>
-        </header>
 
-        <div className="rb-content">
-          <section className="rb-queue">
-            <div className="rb-queue-head">
-              <div>
-                <h1>Pending reimbursements</h1>
-                <p className="rb-subtitle">
-                  Review and action home charging claims submitted by drivers.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="rb-icon-btn"
-                onClick={resetDemo}
-                aria-label="Refresh"
-                title="Reset demo data"
-              >
-                <IconRefresh />
-              </button>
-            </div>
-
-            <div className="rb-table-wrap">
-              <table className="rb-table">
-                <thead>
-                  <tr>
-                    <th>Driver</th>
-                    <th>Vehicle</th>
-                    <th>Energy (kWh)</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pending.map((claim) => (
-                    <tr
-                      key={claim.id}
-                      className={claim.id === selectedId ? "is-selected" : ""}
-                      onClick={() => setSelectedId(claim.id)}
+          <div className="rb-table-wrap">
+            <table className="rb-table">
+              <thead>
+                <tr>
+                  <th>Driver</th>
+                  <th>Vehicle</th>
+                  <th>Energy (kWh)</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+                <tr className="rb-filter-row">
+                  <th>
+                    <input
+                      type="search"
+                      className="rb-filter-input"
+                      placeholder="Name or ID"
+                      aria-label="Filter by driver"
+                      value={filters.driver}
+                      onChange={(e) => setFilter("driver", e.target.value)}
+                    />
+                  </th>
+                  <th>
+                    <input
+                      type="search"
+                      className="rb-filter-input"
+                      placeholder="Model or plate"
+                      aria-label="Filter by vehicle"
+                      value={filters.vehicle}
+                      onChange={(e) => setFilter("vehicle", e.target.value)}
+                    />
+                  </th>
+                  <th>
+                    <div className="rb-filter-range">
+                      <input
+                        type="number"
+                        className="rb-filter-input"
+                        placeholder="Min"
+                        aria-label="Minimum energy in kWh"
+                        value={filters.energyMin}
+                        onChange={(e) => setFilter("energyMin", e.target.value)}
+                      />
+                      <input
+                        type="number"
+                        className="rb-filter-input"
+                        placeholder="Max"
+                        aria-label="Maximum energy in kWh"
+                        value={filters.energyMax}
+                        onChange={(e) => setFilter("energyMax", e.target.value)}
+                      />
+                    </div>
+                  </th>
+                  <th>
+                    <div className="rb-filter-range">
+                      <input
+                        type="number"
+                        className="rb-filter-input"
+                        placeholder="Min £"
+                        aria-label="Minimum amount in pounds"
+                        value={filters.amountMin}
+                        onChange={(e) => setFilter("amountMin", e.target.value)}
+                      />
+                      <input
+                        type="number"
+                        className="rb-filter-input"
+                        placeholder="Max £"
+                        aria-label="Maximum amount in pounds"
+                        value={filters.amountMax}
+                        onChange={(e) => setFilter("amountMax", e.target.value)}
+                      />
+                    </div>
+                  </th>
+                  <th>
+                    <div className="rb-filter-range">
+                      <input
+                        type="date"
+                        className="rb-filter-input"
+                        aria-label="Charged on or after"
+                        value={filters.dateFrom}
+                        onChange={(e) => setFilter("dateFrom", e.target.value)}
+                      />
+                      <input
+                        type="date"
+                        className="rb-filter-input"
+                        aria-label="Charged on or before"
+                        value={filters.dateTo}
+                        onChange={(e) => setFilter("dateTo", e.target.value)}
+                      />
+                    </div>
+                  </th>
+                  <th>
+                    <select
+                      className="rb-filter-input"
+                      aria-label="Filter by status"
+                      value={filters.status}
+                      onChange={(e) => setFilter("status", e.target.value)}
                     >
-                      <td>
-                        <div className="rb-cell-person">
-                          <span className="rb-avatar rb-avatar-sm">
-                            {initials(claim.driverName)}
-                          </span>
-                          <div>
-                            <div className="rb-primary">{claim.driverName}</div>
-                            <div className="rb-secondary">{claim.driverId}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="rb-primary">{claim.vehicleModel}</div>
-                        <div className="rb-secondary">{claim.plate}</div>
-                      </td>
-                      <td>{claim.energyKwh.toFixed(2)} kWh</td>
-                      <td className="rb-amount">
-                        £{amountFor(claim).toFixed(2)}
-                      </td>
-                      <td>{claim.date}</td>
-                      <td>
-                        <span className={`rb-badge rb-badge-${claim.status}`}>
-                          {claim.status[0].toUpperCase() +
-                            claim.status.slice(1)}
+                      <option value="">All</option>
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="paid">Paid</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </th>
+                  <th>
+                    <button
+                      type="button"
+                      className="rb-filter-clear"
+                      onClick={resetFilters}
+                      disabled={!filtersActive}
+                    >
+                      Reset
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((claim) => (
+                  <tr
+                    key={claim.id}
+                    className={claim.id === selectedId ? "is-selected" : ""}
+                    onClick={() => setSelectedId(claim.id)}
+                  >
+                    <td>
+                      <div className="rb-cell-person">
+                        <span className="rb-avatar rb-avatar-sm">
+                          {initials(claim.driverName)}
                         </span>
-                      </td>
-                      <td>
+                        <div>
+                          <div className="rb-primary">{claim.driverName}</div>
+                          <div className="rb-secondary">{claim.driverId}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="rb-primary">{claim.vehicleModel}</div>
+                      <div className="rb-secondary">{claim.plate}</div>
+                    </td>
+                    <td>{claim.energyKwh.toFixed(2)} kWh</td>
+                    <td className="rb-amount">
+                      £{amountFor(claim).toFixed(2)}
+                    </td>
+                    <td>{formatDate(claim.chargedAt)}</td>
+                    <td>
+                      <span className={`rb-badge rb-badge-${claim.status}`}>
+                        {claim.status[0].toUpperCase() + claim.status.slice(1)}
+                      </span>
+                    </td>
+                    <td>
+                      {claim.status === "pending" ? (
                         <div className="rb-actions">
                           <button
                             type="button"
                             className="rb-btn rb-btn-approve"
+                            disabled={actioningId === claim.id}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setStatus(claim.id, "approved");
+                              void setStatus(claim.id, "approved");
                             }}
                           >
                             Approve
@@ -686,214 +593,361 @@ export function ReimbursementsPage() {
                           <button
                             type="button"
                             className="rb-btn rb-btn-reject"
+                            disabled={actioningId === claim.id}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setStatus(claim.id, "rejected");
+                              openRejectDialog(claim.id);
                             }}
                           >
                             Reject
                           </button>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {pending.length === 0 && (
-                    <tr>
-                      <td colSpan={7} className="rb-empty">
-                        All caught up — no pending claims.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                      ) : (
+                        <span className="rb-actioned">
+                          {claim.status === "rejected"
+                            ? "Rejected"
+                            : "Actioned"}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {loading && (
+                  <tr>
+                    <td colSpan={7} className="rb-empty">
+                      Loading claims…
+                    </td>
+                  </tr>
+                )}
+                {!loading && error && (
+                  <tr>
+                    <td colSpan={7} className="rb-empty rb-error">
+                      {error}
+                      <button
+                        type="button"
+                        className="rb-btn rb-btn-approve"
+                        onClick={() => void load()}
+                      >
+                        Retry
+                      </button>
+                    </td>
+                  </tr>
+                )}
+                {!loading && !error && pending.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="rb-empty">
+                      {claims.length === 0
+                        ? "All caught up — no claims."
+                        : "No claims match these filters."}
+                      {claims.length > 0 && filtersActive && (
+                        <button
+                          type="button"
+                          className="rb-btn rb-btn-approve"
+                          onClick={resetFilters}
+                        >
+                          Reset filters
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="rb-pagination">
+            <span className="muted">
+              {pending.length === 0
+                ? "Showing 0 claims"
+                : `Showing ${firstIndex + 1}–${firstIndex + visible.length} of ${pending.length}`}
+              {pending.length !== claims.length &&
+                ` (filtered from ${claims.length})`}
+            </span>
+            <nav className="rb-pager" aria-label="Pagination">
+              <button
+                type="button"
+                className="rb-pager-btn"
+                onClick={() => setRequestedPage(page - 1)}
+                disabled={page <= 1}
+                aria-label="Previous page"
+              >
+                ‹
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (number) => (
+                  <button
+                    key={number}
+                    type="button"
+                    className={
+                      number === page ? "rb-pager-page" : "rb-pager-btn"
+                    }
+                    onClick={() => setRequestedPage(number)}
+                    aria-label={`Page ${number}`}
+                    aria-current={number === page ? "page" : undefined}
+                  >
+                    {number}
+                  </button>
+                ),
+              )}
+              <button
+                type="button"
+                className="rb-pager-btn"
+                onClick={() => setRequestedPage(page + 1)}
+                disabled={page >= totalPages}
+                aria-label="Next page"
+              >
+                ›
+              </button>
+            </nav>
+          </div>
+        </section>
+
+        {selected && (
+          <aside className="rb-details">
+            <div className="rb-details-head">
+              <h2>Claim details</h2>
+              <button
+                type="button"
+                className="rb-icon-btn"
+                onClick={() => setSelectedId(null)}
+                aria-label="Close claim details"
+              >
+                <IconClose />
+              </button>
             </div>
 
-            <div className="rb-pagination">
-              <span className="muted">
-                Showing {pending.length} of {pending.length}
+            <button
+              type="button"
+              className="rb-claim-id"
+              onClick={() => copyClaimId(selected.id)}
+              title="Copy claim ID"
+            >
+              <span>
+                Claim ID: <strong>{selected.id}</strong>
               </span>
-              <div className="rb-pager">
-                <button type="button" className="rb-pager-btn" disabled>
-                  ‹
-                </button>
-                <span className="rb-pager-page">1</span>
-                <button type="button" className="rb-pager-btn" disabled>
-                  ›
-                </button>
+              <IconCopy />
+            </button>
+            {copied && <div className="rb-copied">Copied!</div>}
+
+            <div className="rb-people">
+              <div className="rb-cell-person">
+                <span className="rb-avatar rb-avatar-sm">
+                  {initials(selected.driverName)}
+                </span>
+                <div>
+                  <div className="rb-primary">{selected.driverName}</div>
+                  <div className="rb-secondary">{selected.driverId}</div>
+                </div>
+              </div>
+              <div className="rb-vehicle-info">
+                <div className="rb-primary">{selected.vehicleModel}</div>
+                <div className="rb-secondary">{selected.plate}</div>
               </div>
             </div>
-          </section>
 
-          <aside className="rb-details">
-            {!selected && (
-              <div className="rb-details-empty">
-                <p>Select a claim to see its details.</p>
+            <div className="rb-section-label">Status</div>
+            {/* A rejected claim never enters the approve/pay track, so the
+                timeline would only show steps it can never reach. */}
+            {selected.status === "rejected" ? (
+              <div className="rb-status-rejected">Rejected</div>
+            ) : (
+              <div className="rb-stepper">
+                {STEPS.map((step, i) => {
+                  const state = stepState(selected.status, i);
+                  return (
+                    <div className="rb-step" key={step.key}>
+                      {i > 0 && (
+                        <div className={`rb-step-line step-${state}`} />
+                      )}
+                      <div className="rb-step-node">
+                        <span className={`rb-step-circle step-${state}`}>
+                          {i + 1}
+                        </span>
+                        <span className="rb-step-label">{step.label}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
-            {selected && (
-              <>
-                <div className="rb-details-head">
-                  <h2>Claim details</h2>
-                  <button
-                    type="button"
-                    className="rb-icon-btn"
-                    onClick={() => setSelectedId(null)}
-                    aria-label="Close claim details"
-                  >
-                    <IconClose />
-                  </button>
-                </div>
 
+            <div className="rb-section-label">Cost breakdown</div>
+            <div className="rb-cost-card">
+              <div className="rb-cost-row">
+                <div className="rb-cost-item">
+                  <span className="rb-cost-label">Energy (kWh)</span>
+                  <span className="rb-cost-value">
+                    {selected.energyKwh.toFixed(2)}
+                  </span>
+                </div>
+                <span className="rb-cost-op">×</span>
+                <div className="rb-cost-item">
+                  <span className="rb-cost-label">Agile price (p/kWh)</span>
+                  <span className="rb-cost-value">
+                    {selected.priceP.toFixed(2)}
+                  </span>
+                </div>
+                <span className="rb-cost-op">=</span>
+                <div className="rb-cost-item">
+                  <span className="rb-cost-label">Amount</span>
+                  <span className="rb-cost-value rb-cost-total">
+                    £{amountFor(selected).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              <div className="rb-cost-formula">
+                {selected.energyKwh.toFixed(2)} kWh × £
+                {(selected.priceP / 100).toFixed(4)} = £
+                {amountFor(selected).toFixed(2)}
+              </div>
+            </div>
+
+            <dl className="rb-detail-list">
+              <div className="rb-detail-row">
+                <dt>
+                  <IconCalendar /> Date
+                </dt>
+                <dd>
+                  {formatDate(selected.chargedAt)},{" "}
+                  {formatTime(selected.chargedAt)}
+                </dd>
+              </div>
+              <div className="rb-detail-row">
+                <dt>
+                  <IconPin /> Location
+                </dt>
+                <dd>{selected.location}</dd>
+              </div>
+              <div className="rb-detail-row">
+                <dt>
+                  <IconGrid /> Grid region
+                </dt>
+                <dd>{selected.gridRegion}</dd>
+              </div>
+              <div className="rb-detail-row">
+                <dt>
+                  <IconTag /> Tariff
+                </dt>
+                <dd>{selected.tariff}</dd>
+              </div>
+              <div className="rb-detail-row">
+                <dt>
+                  <IconDoc /> Source
+                </dt>
+                <dd>{selected.source}</dd>
+              </div>
+              <div className="rb-detail-row">
+                <dt>
+                  <IconNote /> Notes
+                </dt>
+                <dd
+                  className={
+                    selected.status === "rejected" ? "rb-note-reason" : ""
+                  }
+                >
+                  {selected.notes}
+                </dd>
+              </div>
+            </dl>
+
+            {selected.status === "pending" ? (
+              <div className="rb-details-actions">
                 <button
                   type="button"
-                  className="rb-claim-id"
-                  onClick={() => copyClaimId(selected.id)}
-                  title="Copy claim ID"
+                  className="rb-btn-wide rb-btn-approve-wide"
+                  disabled={actioningId === selected.id}
+                  onClick={() => void setStatus(selected.id, "approved")}
                 >
-                  <span>
-                    Claim ID: <strong>{selected.id}</strong>
-                  </span>
-                  <IconCopy />
+                  {actioningId === selected.id ? "Saving…" : "Approve claim"}
                 </button>
-                {copied && <div className="rb-copied">Copied!</div>}
-
-                <div className="rb-people">
-                  <div className="rb-cell-person">
-                    <span className="rb-avatar rb-avatar-sm">
-                      {initials(selected.driverName)}
-                    </span>
-                    <div>
-                      <div className="rb-primary">{selected.driverName}</div>
-                      <div className="rb-secondary">{selected.driverId}</div>
-                    </div>
-                  </div>
-                  <div className="rb-vehicle-info">
-                    <div className="rb-primary">{selected.vehicleModel}</div>
-                    <div className="rb-secondary">{selected.plate}</div>
-                  </div>
-                </div>
-
-                <div className="rb-section-label">Status</div>
-                <div className="rb-stepper">
-                  {STEPS.map((step, i) => {
-                    const idx = stepIndex(selected.status);
-                    const state =
-                      selected.status === "rejected"
-                        ? "rejected"
-                        : i < idx
-                          ? "done"
-                          : i === idx
-                            ? "current"
-                            : "upcoming";
-                    return (
-                      <div className="rb-step" key={step.key}>
-                        {i > 0 && (
-                          <div className={`rb-step-line step-${state}`} />
-                        )}
-                        <div className="rb-step-node">
-                          <span className={`rb-step-circle step-${state}`}>
-                            {i + 1}
-                          </span>
-                          <span className="rb-step-label">{step.label}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="rb-section-label">Cost breakdown</div>
-                <div className="rb-cost-card">
-                  <div className="rb-cost-row">
-                    <div className="rb-cost-item">
-                      <span className="rb-cost-label">Energy (kWh)</span>
-                      <span className="rb-cost-value">
-                        {selected.energyKwh.toFixed(2)}
-                      </span>
-                    </div>
-                    <span className="rb-cost-op">×</span>
-                    <div className="rb-cost-item">
-                      <span className="rb-cost-label">Agile price (p/kWh)</span>
-                      <span className="rb-cost-value">
-                        {selected.priceP.toFixed(2)}
-                      </span>
-                    </div>
-                    <span className="rb-cost-op">=</span>
-                    <div className="rb-cost-item">
-                      <span className="rb-cost-label">Amount</span>
-                      <span className="rb-cost-value rb-cost-total">
-                        £{amountFor(selected).toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="rb-cost-formula">
-                    {selected.energyKwh.toFixed(2)} kWh × £
-                    {(selected.priceP / 100).toFixed(4)} = £
-                    {amountFor(selected).toFixed(2)}
-                  </div>
-                </div>
-
-                <dl className="rb-detail-list">
-                  <div className="rb-detail-row">
-                    <dt>
-                      <IconCalendar /> Date
-                    </dt>
-                    <dd>
-                      {selected.date}, {selected.time}
-                    </dd>
-                  </div>
-                  <div className="rb-detail-row">
-                    <dt>
-                      <IconPin /> Location
-                    </dt>
-                    <dd>{selected.location}</dd>
-                  </div>
-                  <div className="rb-detail-row">
-                    <dt>
-                      <IconGrid /> Grid region
-                    </dt>
-                    <dd>{selected.gridRegion}</dd>
-                  </div>
-                  <div className="rb-detail-row">
-                    <dt>
-                      <IconTag /> Tariff
-                    </dt>
-                    <dd>{selected.tariff}</dd>
-                  </div>
-                  <div className="rb-detail-row">
-                    <dt>
-                      <IconDoc /> Source
-                    </dt>
-                    <dd>{selected.source}</dd>
-                  </div>
-                  <div className="rb-detail-row">
-                    <dt>
-                      <IconNote /> Notes
-                    </dt>
-                    <dd>{selected.notes}</dd>
-                  </div>
-                </dl>
-
-                <div className="rb-details-actions">
+                <button
+                  type="button"
+                  className="rb-btn-wide rb-btn-reject-wide"
+                  disabled={actioningId === selected.id}
+                  onClick={() => openRejectDialog(selected.id)}
+                >
+                  Reject claim
+                </button>
+              </div>
+            ) : (
+              <div className="rb-details-actions">
+                <p
+                  className={`rb-outcome rb-outcome-${
+                    selected.status === "rejected" ? "rejected" : "approved"
+                  }`}
+                >
+                  {selected.status === "rejected"
+                    ? "This claim was rejected."
+                    : `This claim was ${selected.status}.`}
+                </p>
+                {/* Paying is only the step after approval — a rejected or
+                        already-paid claim has nowhere left to go. */}
+                {selected.status === "approved" && (
                   <button
                     type="button"
-                    className="rb-btn-wide rb-btn-approve-wide"
-                    onClick={() => setStatus(selected.id, "approved")}
+                    className="rb-btn-wide rb-btn-paid-wide"
+                    disabled={actioningId === selected.id}
+                    onClick={() => void setStatus(selected.id, "paid")}
                   >
-                    Approve claim
+                    {actioningId === selected.id ? "Saving…" : "Mark as paid"}
                   </button>
-                  <button
-                    type="button"
-                    className="rb-btn-wide rb-btn-reject-wide"
-                    onClick={() => setStatus(selected.id, "rejected")}
-                  >
-                    Reject claim
-                  </button>
-                </div>
-              </>
+                )}
+              </div>
             )}
           </aside>
-        </div>
+        )}
       </div>
+
+      {rejectingId && (
+        <div
+          className="rb-modal-backdrop"
+          role="presentation"
+          onClick={() => setRejectingId(null)}
+        >
+          <div
+            className="rb-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rb-reject-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="rb-reject-title">Reject claim</h2>
+            <p className="rb-modal-text">
+              Give a reason for rejecting {rejectingId}. It is saved to the
+              claim&rsquo;s notes.
+            </p>
+            <label className="rb-modal-label" htmlFor="rb-reject-reason">
+              Reason
+            </label>
+            <textarea
+              id="rb-reject-reason"
+              className="rb-modal-input"
+              rows={3}
+              autoFocus
+              value={rejectReason}
+              placeholder="e.g. Duplicate of an earlier claim"
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+            <div className="rb-modal-actions">
+              <button
+                type="button"
+                className="rb-btn rb-btn-reject"
+                onClick={() => setRejectingId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rb-btn rb-btn-confirm-reject"
+                disabled={rejectReason.trim() === ""}
+                onClick={() => void confirmReject()}
+              >
+                Reject claim
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

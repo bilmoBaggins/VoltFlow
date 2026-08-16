@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { clearAuth, getStoredUser } from "../api/auth";
 import "./AppLayout.css";
 
@@ -231,16 +231,7 @@ function NavItem({ to, end, icon, label, disabled }: NavItemProps) {
 }
 
 export function AppLayout() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const isReimbursementsActive =
-    location.pathname.startsWith("/reimbursements");
-  const [reimbursementsOpen, setReimbursementsOpen] = useState(
-    isReimbursementsActive,
-  );
-  const [prevReimbursementsActive, setPrevReimbursementsActive] = useState(
-    isReimbursementsActive,
-  );
 
   const user = getStoredUser();
   const displayName = user?.name ?? "Admin";
@@ -266,15 +257,6 @@ export function AppLayout() {
     navigate("/login");
   }
 
-  // Adjusting state during render (not in an effect) on navigating into
-  // /reimbursements — see https://react.dev/learn/you-might-not-need-an-effect
-  if (isReimbursementsActive !== prevReimbursementsActive) {
-    setPrevReimbursementsActive(isReimbursementsActive);
-    if (isReimbursementsActive) {
-      setReimbursementsOpen(true);
-    }
-  }
-
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -291,51 +273,11 @@ export function AppLayout() {
           <NavItem to="/driver" icon={<UserIcon />} label="Drivers" />
           <NavItem to="/sessions" icon={<ZapIcon />} label="Charging" />
 
-          <div className="nav-group">
-            <div
-              className={isReimbursementsActive ? "nav-row active" : "nav-row"}
-            >
-              <NavLink to="/reimbursements" className="nav-link">
-                <span className="nav-icon">
-                  <FileIcon />
-                </span>
-                <span className="nav-label">Reimbursements</span>
-              </NavLink>
-              <button
-                type="button"
-                className={
-                  reimbursementsOpen ? "nav-chevron open" : "nav-chevron"
-                }
-                aria-expanded={reimbursementsOpen}
-                aria-label={
-                  reimbursementsOpen
-                    ? "Collapse Reimbursements"
-                    : "Expand Reimbursements"
-                }
-                onClick={() => setReimbursementsOpen((open) => !open)}
-              >
-                <ChevronDownIcon />
-              </button>
-            </div>
-            {reimbursementsOpen && (
-              <div className="nav-subgroup">
-                <NavLink
-                  to="/reimbursements"
-                  end
-                  className={({ isActive }) =>
-                    isActive ? "nav-sublink active" : "nav-sublink"
-                  }
-                >
-                  Queue
-                </NavLink>
-                <span className="nav-sublink disabled">
-                  History
-                  <span className="nav-soon">Soon</span>
-                </span>
-              </div>
-            )}
-          </div>
-
+          <NavItem
+            to="/reimbursements"
+            icon={<FileIcon />}
+            label="Reimbursements"
+          />
           <NavItem to="/ai" icon={<SparkleIcon />} label="Ask AI" />
           <NavItem icon={<BarChartIcon />} label="Reports" disabled />
           <NavItem to="/settings" icon={<GearIcon />} label="Settings" />

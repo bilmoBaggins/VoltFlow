@@ -113,6 +113,12 @@ model Reimbursement {
   amountGbp Decimal             @map("amount_gbp") @db.Decimal(10, 2)
   status    ReimbursementStatus @default(pending)
   createdAt DateTime            @default(now()) @map("created_at") @db.Timestamp(0)
+  // Snapshotted at claim time: a claim is a financial record, so it keeps the
+  // plate/tariff it was filed under even if the vehicle or contract changes later.
+  plate     String?             @db.VarChar(16)
+  tariff    String?             @db.VarChar(64)
+  source    String?             @db.VarChar(64)
+  notes     String?             @db.Text
   session   ChargingSession     @relation(fields: [sessionId], references: [id])
 
   @@map("reimbursements")
