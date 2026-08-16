@@ -3,7 +3,7 @@
  * Mockup: docs/mockups/voltflow-reimbursement-queue.png
  * Data: GET /reimbursements?status=pending, PATCH /reimbursements/:id/status
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchReimbursements, updateReimbursementStatus } from "../api/client";
 import type { ClaimStatus, ReimbursementClaim } from "../types/reimbursement";
 import "./ReimbursementsPage.css";
@@ -111,6 +111,10 @@ function matchesFilters(claim: ReimbursementClaim, filters: Filters): boolean {
   if (filters.dateTo && day > filters.dateTo) return false;
 
   return true;
+}
+
+function loadErrorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : "Failed to load claims";
 }
 
 function initials(name: string): string {
@@ -341,25 +345,38 @@ export function ReimbursementsPage() {
   }
 
   /**
+   * Mount fetch. State is only ever set from the promise callbacks — a
+   * synchronous setState in an effect body cascades an extra render, which
+   * react-hooks/set-state-in-effect rejects. `loading` already starts true.
+   *
    * Every claim is fetched so the status filter can reach decided ones; the
    * filter defaults to pending, which is the queue this page is named for.
    */
-  const load = useCallback(async () => {
+  useEffect(() => {
+    fetchReimbursements()
+      .then(setClaims)
+      .catch((err: unknown) => {
+        setError(loadErrorMessage(err));
+        setClaims([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  /** Reload from a click, where setting state synchronously is fine. */
+  async function refresh() {
     setLoading(true);
     setError(null);
     try {
       setClaims(await fetchReimbursements());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load claims");
+      setError(loadErrorMessage(err));
       setClaims([]);
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  }
 
   /**
    * The actioned claim stays in the table showing its new status, so the
@@ -418,7 +435,7 @@ export function ReimbursementsPage() {
             <button
               type="button"
               className="rb-icon-btn"
-              onClick={() => void load()}
+              onClick={refresh}
               aria-label="Refresh"
               title="Reload claims"
               disabled={loading}
@@ -626,7 +643,7 @@ export function ReimbursementsPage() {
                       <button
                         type="button"
                         className="rb-btn rb-btn-approve"
-                        onClick={() => void load()}
+                        onClick={refresh}
                       >
                         Retry
                       </button>
