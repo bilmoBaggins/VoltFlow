@@ -11,7 +11,8 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js",
-    "db:setup": "prisma migrate deploy && node prisma/seed.js"
+    "seed:reimbursements": "node prisma/seedReimbursements.js",
+    "db:setup": "prisma migrate deploy && node prisma/seed.js && node prisma/seedReimbursements.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

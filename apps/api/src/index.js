@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import vehiclesRouter from "./routes/vehicles.js";
 import authRouter from "./routes/auth.js";
+import reimbursementsRouter from "./routes/reimbursements.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const openapi = YAML.load(join(__dirname, "../openapi.yaml"));
@@ -23,6 +24,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/vehicles", vehiclesRouter);
 app.use("/auth", authRouter);
+app.use("/reimbursements", reimbursementsRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapi));
 
 app.listen(PORT, () => {

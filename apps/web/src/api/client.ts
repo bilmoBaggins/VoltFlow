@@ -4,6 +4,7 @@ import type {
   MessageResponse,
   RegisterResponse,
 } from "../types/auth";
+import type { ClaimStatus, ReimbursementClaim } from "../types/reimbursement";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -35,6 +36,23 @@ async function getJson<T>(path: string): Promise<T> {
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    const message =
+      (data && typeof data === "object" && "error" in data
+        ? (data as { error?: string }).error
+        : null) ?? `API ${res.status}: ${path}`;
+    throw new ApiError(res.status, message, data);
+  }
+  return data as T;
+}
+
+async function patchJson<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
@@ -102,4 +120,23 @@ export function fetchVehicle(id: string): Promise<Vehicle> {
 
 export function fetchTelemetry(id: string): Promise<Telemetry> {
   return getJson<Telemetry>(`/vehicles/${id}/telemetry`);
+}
+
+export function fetchReimbursements(
+  status?: ClaimStatus,
+): Promise<ReimbursementClaim[]> {
+  const query = status ? `?status=${status}` : "";
+  return getJson<ReimbursementClaim[]>(`/reimbursements${query}`);
+}
+
+/** `notes` is required by the API when rejecting — it records why. */
+export function updateReimbursementStatus(
+  id: string,
+  status: ClaimStatus,
+  notes?: string,
+): Promise<ReimbursementClaim> {
+  return patchJson<ReimbursementClaim>(`/reimbursements/${id}/status`, {
+    status,
+    ...(notes === undefined ? {} : { notes }),
+  });
 }
